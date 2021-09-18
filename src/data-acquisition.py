@@ -16,7 +16,7 @@ class HockeyDataLoader:
 		"""
 		:param year: 4-digit desired season year. For example, '2017' for the 2017-2018 season.
 		:param base_save_file_path: Basic path from which season data dirs are created. By default, '../data/raw/'
-		:return: None. Saves file at desired location
+Min		:return: None. Saves file to base_save_file_path/year/game_id.json
 		"""
 
 		# Sanity checks
@@ -65,8 +65,8 @@ class HockeyDataLoader:
 
 	def acquire_all_data(self):
 		"""
-		Fetches all seasons data from self.SEASONS
-		:return:
+		Fetches data for all seasons contained in self.SEASONS
+		:return: None
 		"""
 		for year in self.SEASONS:
 			self.get_season_data(year)
