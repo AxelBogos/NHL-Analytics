@@ -12,8 +12,6 @@ class HockeyDataLoader:
 		assert (base_save_path.startswith("../data/raw/"))
 		self.SEASONS = season_years
 		self.base_save_path = base_save_path
-		self.reg_season_dir = os.path.join(base_save_path, 'regular_season')
-		self.playoffs_dir = os.path.join(base_save_path, 'playoffs')
 
 	def get_season_data(self, year: str) -> None:
 		"""
@@ -48,11 +46,11 @@ class HockeyDataLoader:
 		regular_season = [f'{year}02{game_number}' for game_number in game_numbers]
 
 		# Check saving directories exist
-		if not os.path.isdir(self.reg_season_dir): os.mkdir(self.reg_season_dir)
+		if not os.path.isdir(self.base_save_path): os.mkdir(self.base_save_path)
 
 		# Get game data
 		for game_id in regular_season:
-			self.get_game_data(game_id, year, self.reg_season_dir, make_asserts=False)
+			self.get_game_data(game_id, year, self.base_save_path, make_asserts=False)
 
 	def get_playoffs_data(self, year: str, make_asserts: bool = True) -> None:
 		"""
@@ -78,11 +76,11 @@ class HockeyDataLoader:
 		playoffs.extend([f"{year}0304{1}{game_number}" for game_number in range(1, 8)])
 
 		# Check saving directories exist
-		if not os.path.isdir(self.playoffs_dir): os.mkdir(self.playoffs_dir)
+		if not os.path.isdir(self.base_save_path): os.mkdir(self.base_save_path)
 
 		# Get game data
 		for game_id in playoffs:
-			self.get_game_data(game_id, year, self.playoffs_dir, make_asserts=False)
+			self.get_game_data(game_id, year, self.base_save_path, make_asserts=False)
 
 	def get_game_data(self, game_id: str, year: str, dir_path: str, make_asserts: bool = True) -> None:
 		"""
