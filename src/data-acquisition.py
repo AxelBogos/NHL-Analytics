@@ -73,4 +73,5 @@ class HockeyDataLoader:
 
 
 if __name__ == "__main__":
-	acquire_all_data()
+	hockey_data_loader = HockeyDataLoader()
+	hockey_data_loader.acquire_all_data()
