@@ -6,27 +6,66 @@ class HockeyDataLoader:
 	"""
 	Class handling all seasonal data loadings.
 	"""
-	def __init__(self, season_years=None, base_save_file_path='../data/raw/'):
+	def __init__(self, season_years=None, base_save_path='../data/raw/'):
 		if season_years is None:
 			season_years = ['2017', '2018', '2019', '2020']
-		assert (base_save_file_path.startswith("../data/raw/"))
+		assert (base_save_path.startswith("../data/raw/"))
 		self.SEASONS = season_years
-		self.base_save_file_path = base_save_file_path
-		self.reg_season_dir = os.path.join(base_save_file_path, 'regular_season')
-		self.playoffs_dir = os.path.join(base_save_file_path, 'playoffs')
+		self.base_save_path = base_save_path
+		self.reg_season_dir = os.path.join(base_save_path, 'regular_season')
+		self.playoffs_dir = os.path.join(base_save_path, 'playoffs')
 
 	def get_season_data(self, year: str) -> None:
 		"""
+		Function using REST calls to fetch data of a whole season (regular season & playoffs). Saves resulting json in
+		the path defined in self.base_save_path
 		:param year: 4-digit desired season year. For example, '2017' for the 2017-2018 season.
-		:return: None. Saves file to base_save_file_path/game_id.json
+		:return: None
 		"""
 		# Sanity checks
 		assert (len(year) == 4)
 		assert (2016 <= int(year) <= 2021)
 
+		# Get game data
+		self.get_regular_season_data(year)
+		self.get_playoffs_data(year)
+
+	def get_regular_season_data(self, year: str, make_asserts: bool = True) -> None:
+		"""
+		Function using REST calls to fetch data of a regular season of a given year. Saves resulting json in
+		the path defined in self.base_save_path
+		:param year: 4-digit desired season year. For example, '2017' for the 2017-2018 season.
+		:param make_asserts: boolean to determine whether or not make sanity checks. False if function is called from
+		get_season_data
+		:return: None
+		"""
+		if make_asserts:
+			assert (len(year) == 4)
+			assert (2016 <= int(year) <= 2021)
+
 		# Regular Season game-ids
 		game_numbers = ["%04d" % x for x in range(1, 1272)]  # 0001, 0002, .... 1271
 		regular_season = [f'{year}02{game_number}' for game_number in game_numbers]
+
+		# Check saving directories exist
+		if not os.path.isdir(self.reg_season_dir): os.mkdir(self.reg_season_dir)
+
+		# Get game data
+		for game_id in regular_season:
+			self.get_game_data(game_id, year, self.reg_season_dir, make_asserts=False)
+
+	def get_playoffs_data(self, year: str, make_asserts: bool = True) -> None:
+		"""
+		Function using REST calls to fetch data of the playoffs of a given year. Saves resulting json in
+		the path defined in self.base_save_path
+		:param year: 4-digit desired season year. For example, '2017' for the 2017-2018 season.
+		:param make_asserts: boolean to determine whether or not make sanity checks. False if function is called from
+		get_season_data
+		:return: None
+		"""
+		if make_asserts:
+			assert (len(year) == 4)
+			assert (2016 <= int(year) <= 2021)
 
 		# Playoffs game-ids.
 		# eights of final
@@ -39,18 +78,15 @@ class HockeyDataLoader:
 		playoffs.extend([f"{year}0304{1}{game_number}" for game_number in range(1, 8)])
 
 		# Check saving directories exist
-		if not os.path.isdir(self.reg_season_dir): os.mkdir(self.reg_season_dir)
 		if not os.path.isdir(self.playoffs_dir): os.mkdir(self.playoffs_dir)
 
 		# Get game data
-		for game_id in regular_season:
-			self.get_game_data(game_id, year, self.reg_season_dir, make_asserts=False)
 		for game_id in playoffs:
 			self.get_game_data(game_id, year, self.playoffs_dir, make_asserts=False)
 
 	def get_game_data(self, game_id: str, year: str, dir_path: str, make_asserts: bool = True) -> None:
 		"""
-		Get a single game data and save it to base_save_file_path/game_id.json
+		Get a single game data and save it to base_save_path/game_id.json
 		:param game_id: id of the game. See https://gitlab.com/dword4/nhlapi/-/blob/master/stats-api.md#game-ids
 		:param year: 4-digit desired season year. For example, '2017' for the 2017-2018 season.
 		:param dir_path: path of saving directory. Normally, '../data/raw/regular_season OR playoffs
