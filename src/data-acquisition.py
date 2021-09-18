@@ -6,7 +6,6 @@ class HockeyDataLoader:
 	"""
 	Class handling all seasonal data loadings.
 	"""
-
 	def __init__(self, season_years=None, base_save_file_path='../data/raw/'):
 		if season_years is None:
 			season_years = ['2017', '2018', '2019', '2020']
