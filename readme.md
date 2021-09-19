@@ -1,6 +1,6 @@
 # 🏒 IFT-6758 Project
 
-NHL Data 
+NHL Data
 
 - [👩‍🔬👨‍🔬 Authors](#-authors)
 - [📐 Environment Variables :](#-environment-variables-)
@@ -44,6 +44,18 @@ Go to the project directory
   cd my-project
 ```
 
+Get the data, either by running
+
+```python
+python src/data-acquisition.py
+python src/tidy-data.pu
+```
+
+*OR*
+
+download the data directory from [here](https://drive.google.com/drive/folders/1joAB2DbjVjC8eyHsURIbO9qqR5ZJNXZL?usp=sharing) and place the whole directory under the project root (i.e. ```.../Project/data/```)
+
+
 Install virtual environment
 
 ```bash
@@ -60,12 +72,10 @@ blabla
 
 [Documentation](https://linktodocumentation) or just write more details here
 
-
 ## ☑️ Milestones
 
 1. [](https://)
-
-3.
+2.
 
 ## 📡 Deployment
 
