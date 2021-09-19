@@ -1,6 +1,6 @@
 # 🏒 IFT-6758 Project
 
-NHL Data
+Description
 
 - [👩‍🔬👨‍🔬 Authors](#-authors)
 - [📐 Environment Variables :](#-environment-variables-)
@@ -35,13 +35,13 @@ Insert gif or link to demo for interactive plots + blog[](https://)
 Clone the project
 
 ```bash
-  git clone https://link-to-project
+  git clone https://github.com/AxelBogos/IFT6758-Project.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd my-project
+  cd project
 ```
 
 Get the data, either by running
@@ -71,6 +71,7 @@ blabla
 ## ✒️ Documentation
 
 [Documentation](https://linktodocumentation) or just write more details here
+
 
 ## ☑️ Milestones
 
