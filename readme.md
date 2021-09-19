@@ -8,10 +8,9 @@ Description
 - [⚙️ Run Locally](#️-run-locally)
 - [✒️ Documentation](#️-documentation)
 - [📡 Deployment](#-deployment)
-- 🔨 Appendix
+- [🔨 Appendix](#-appendix)
 
-
-## 👩‍🔬👨‍🔬 Authors
+## 👩‍🔬👨‍🔬 Authors[](https://)
 
 - [@Axel Bogos](https://www.github.com/AxelBogos)
 -
