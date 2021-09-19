@@ -3,7 +3,7 @@
 Description
 
 - [👩‍🔬👨‍🔬 Authors](#-authors)
-- [📐 Environment Variables :](#-environment-variables-)
+- [📐 Environment Variables](#-environment-variables-)
 - [👀️ Demo](#️-demo)
 - [⚙️ Run Locally](#️-run-locally)
 - [✒️ Documentation](#️-documentation)
