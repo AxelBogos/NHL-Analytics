@@ -28,7 +28,7 @@ To run this project, you will need to add the following environment variables to
 
 ## 👀️ Demo
 
-Insert gif or link to demo for interactive plots + blog[](https://)
+Insert gif or link to demo for interactive plots + blog
 
 ## ⚙️ Run Locally
 
@@ -55,7 +55,6 @@ python src/tidy-data.pu
 
 download the data directory from [here](https://drive.google.com/drive/folders/1joAB2DbjVjC8eyHsURIbO9qqR5ZJNXZL?usp=sharing) and place the whole directory under the project root (i.e. ```.../Project/data/```)
 
-
 Install virtual environment
 
 ```bash
@@ -72,11 +71,11 @@ blabla
 
 [Documentation](https://linktodocumentation) or just write more details here
 
-
 ## ☑️ Milestones
 
 1. [](https://)
-2.
+2. [](https://)
+3.
 
 ## 📡 Deployment
 
