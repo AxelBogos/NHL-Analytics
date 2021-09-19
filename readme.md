@@ -35,13 +35,13 @@ Insert gif or link to demo for interactive plots + blog[](https://)
 Clone the project
 
 ```bash
-  git clone https://link-to-project
+  git clone https://github.com/AxelBogos/IFT6758-Project.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd my-project
+  cd project
 ```
 
 Install virtual environment
