@@ -1,6 +1,6 @@
 # 🏒 IFT-6758 Project
 
-NHL Data 
+Description
 
 - [👩‍🔬👨‍🔬 Authors](#-authors)
 - [📐 Environment Variables :](#-environment-variables-)
