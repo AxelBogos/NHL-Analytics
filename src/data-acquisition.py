@@ -13,6 +13,11 @@ class HockeyDataLoader:
 		self.SEASONS = season_years
 		self.base_save_path = base_save_path
 
+		if not os.path.isdir('../data/'):
+			os.mkdir('../data/')
+		if not os.path.isdir('../data/raw/'):
+			os.mkdir('../data/raw/')
+
 	def get_season_data(self, year: str) -> None:
 		"""
 		Function using REST calls to fetch data of a whole season (regular season & playoffs). Saves resulting json in
