@@ -1,4 +1,4 @@
-# IFT-6758 Project
+# 🚀 IFT-6758 Project
 
 Description
 
