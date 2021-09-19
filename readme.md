@@ -2,14 +2,14 @@
 
 Description
 
-## Authors
+## 👩‍🔬👨‍🔬 Authors
 
 - [@Axel Bogos](https://www.github.com/AxelBogos)
 -
 -
 -
 
-## Environment Variables
+## 📐 Environment Variables :
 
 To run this project, you will need to add the following environment variables to your .env file
 
@@ -17,11 +17,11 @@ To run this project, you will need to add the following environment variables to
 
 `THING2`
 
-## Demo
+## 👀️ Demo
 
 Insert gif or link to demo for interactive plots + blog[](https://)
 
-## Run Locally
+## ⚙️ Run Locally
 
 Clone the project
 
@@ -47,11 +47,11 @@ Run scripts / launch notebook or whatever
 blabla
 ```
 
-## Documentation
+## ✒️ Documentation
 
 [Documentation](https://linktodocumentation) or just write more details here
 
-## Deployment
+## 📡 Deployment
 
 Details about the github pages deploy
 
@@ -59,6 +59,6 @@ Details about the github pages deploy
   npm run deploy
 ```
 
-## Appendix
+## 🔨 Appendix
 
 Any additional information goes here
