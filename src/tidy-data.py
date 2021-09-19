@@ -5,8 +5,9 @@ import os
 
 
 class DataFrameBuilder:
-	def __init__(self, base_file_path='../data/raw/'):
+	def __init__(self, base_file_path='../data/raw/', output_dir='../data/'):
 		self.base_file_path = base_file_path
+		self.output_dir = output_dir
 
 	def read_json_file(self, file_path) -> dict:
 		"""
@@ -32,11 +33,14 @@ class DataFrameBuilder:
 		:return: returns a list of list (game shots/goals)
 		"""
 		game_data = []
+		if 'liveData' not in json_data or 'plays' not in json_data['liveData'] or 'allPlays' not in \
+				json_data['liveData']['plays']:
+			return [None] * 13
 		for event in json_data['liveData']['plays']['allPlays']:
 			if event['result']['event'] == 'Goal' or event['result']['event'] == 'Shot':
 				game_data.append([
 					json_data['gamePk'],
-					f"{(int(event['about']['period'])-1)*20 + int(event['about']['periodTime'].split(':')[0])}:{event['about']['periodTime'].split(':')[1]}",
+					f"{(int(event['about']['period']) - 1) * 20 + int(event['about']['periodTime'].split(':')[0])}:{event['about']['periodTime'].split(':')[1]}",
 					event['about']['period'],
 					event['about']['periodTime'],
 					event['team']['name'],
@@ -44,10 +48,11 @@ class DataFrameBuilder:
 					event['players'][-1]['player']['fullName'],
 					True if event['result']['event'] == 'Goal' else False,
 					event['result']['secondaryType'] if 'secondaryType' in event['result'] else None,
-					event['coordinates']['x'],
-					event['coordinates']['y'],
+					event['coordinates']['x'] if 'x' in event['coordinates'] else None,
+					event['coordinates']['y'] if 'y' in event['coordinates'] else None,
 					event['result']['emptyNet'] if 'emptyNet' in event['result'] else None,
-					event['result']['strength']['name'] if 'strength' in event['result'] else None
+					event['result']['strength']['name'] if 'strength' in event['result'] else None,
+					json_data['gameData']['game']['type'] == "P"
 				])
 		return game_data
 
@@ -56,19 +61,21 @@ class DataFrameBuilder:
 
 		:return:
 		"""
+		features = ['game_id', 'game_time', 'period', 'period_time', 'team', 'shooter', 'goalie', 'is_goal',
+		            'shot_type', 'x_coordinate', 'y_coordinate', 'is_empty_net', 'strength', 'is_playoff']
 		result = pd.DataFrame(
-			columns=['game_id', 'game_time', 'period', 'period_time', 'team', 'shooter', 'goalie', 'is_goal',
-			         'shot_type', 'x_coordinate', 'y_coordinate', 'is_empty_net', 'strength'])
+			columns=features)
 		json_data = self.read_all_json()
-
+		result = []
 		for game in json_data:
 			data = self.parse_game_data(game)
-			result = pd.concat([result, pd.DataFrame(data, columns=['game_id', 'game_time', 'period', 'period_time',
-			                                                        'team', 'shooter', 'goalie', 'is_goal',
-			                                                        'shot_type', 'x_coordinate', 'y_coordinate',
-			                                                        'is_empty_net', 'strength'])], )
+			if data == [None] * 13:  # empty row
+				continue
+			result.extend([i for i in self.parse_game_data(game)])  # quicker than just extend
 
-		result.to_csv('../data/tidy_data.csv', index=False)
+		result = pd.DataFrame(result, columns=features)
+
+		result.to_csv(os.path.join(self.output_dir, 'tidy_data.csv'), index=False)
 
 
 if __name__ == "__main__":
