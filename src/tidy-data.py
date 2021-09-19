@@ -45,27 +45,28 @@ class DataFrameBuilder:
 		for event in json_data['liveData']['plays']['allPlays']:
 			if event['result']['event'] != 'Goal' and event['result']['event'] != 'Shot':
 				continue
-			game_data.append([
-				json_data['gamePk'],
-				f"{(int(event['about']['period']) - 1) * 20 + int(event['about']['periodTime'].split(':')[0])}:{event['about']['periodTime'].split(':')[1]}",
-				event['about']['period'],
-				event['about']['periodTime'],
-				event['team']['name'],
-				event['players'][0]['player']['fullName'],
-				event['players'][-1]['player']['fullName'],
-				True if event['result']['event'] == 'Goal' else False,
-				event['result']['secondaryType'] if 'secondaryType' in event['result'] else None,
-				event['coordinates']['x'] if 'x' in event['coordinates'] else None,
-				event['coordinates']['y'] if 'y' in event['coordinates'] else None,
-				event['result']['emptyNet'] if 'emptyNet' in event['result'] else None,
-				event['result']['strength']['name'] if 'strength' in event['result'] else None,
-				json_data['gameData']['game']['type'] == "P",
-				event['team']['id'] == json_data['gameData']['teams']['home']['id'],
-				get_shot_distance(event['coordinates']['x'], event['coordinates']['y'],
+
+			game_data.append({
+				'game_id':json_data['gamePk'],
+				'game_time': f"{(int(event['about']['period']) - 1) * 20 + int(event['about']['periodTime'].split(':')[0])}:{event['about']['periodTime'].split(':')[1]}",
+				'period': event['about']['period'],
+				'period_time': event['about']['periodTime'],
+				'team': event['team']['name'],
+				'shooter': event['players'][0]['player']['fullName'],
+				'goalie': event['players'][-1]['player']['fullName'],
+				'is_goal': True if event['result']['event'] == 'Goal' else False,
+				'shot_type': event['result']['secondaryType'] if 'secondaryType' in event['result'] else None,
+				'x_coordinate': event['coordinates']['x'] if 'x' in event['coordinates'] else None,
+				'y_coordinate': event['coordinates']['y'] if 'y' in event['coordinates'] else None,
+				'is_empty_net': event['result']['emptyNet'] if 'emptyNet' in event['result'] else None,
+				'strength': event['result']['strength']['name'] if 'strength' in event['result'] else None,
+				'is_playoff': json_data['gameData']['game']['type'] == "P",
+				'is_home_team': event['team']['id'] == json_data['gameData']['teams']['home']['id'],
+				'shot_distance': get_shot_distance(event['coordinates']['x'], event['coordinates']['y'],
 				                  event['team']['id'] == json_data['gameData']['teams']['home']['id'],
 				                  event['about']['period']) if 'x' in event['coordinates'] and 'y' in event[
 					'coordinates'] else None
-			])
+			})
 		return game_data
 
 	def make_dataframe(self) -> None:
@@ -74,8 +75,6 @@ class DataFrameBuilder:
 		then parsing the data into a list of list and finally saving the equivalent pd.DataFrame as a .csv
 		:return: None
 		"""
-		result = pd.DataFrame(
-			columns=self.features)
 		json_data = self.read_all_json()
 		result = []
 		for game in json_data:

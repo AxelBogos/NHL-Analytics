@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn
 import seaborn as sns
 import pandas as pd
@@ -28,8 +29,8 @@ class HockeyPlotter:
 			'shot_type'].value_counts()
 		for idx, p in enumerate(ax1.patches):
 			height = p.get_height()
-			ax1.text(p.get_x() + p.get_width() / 2., height + 450, f'{goal_percentage[idx] * 100 : .2f}%', size=12,
-			         ha="center")
+			ax1.text(p.get_x() + p.get_width() / 2., height + 450, f'{goal_percentage[idx] * 100 : .2f}%',
+			         size=12, ha="center")
 
 		ax2 = sns.countplot(
 			x='shot_type',
@@ -53,21 +54,30 @@ class HockeyPlotter:
 
 		:return:
 		"""
-		# xy coordinates of goal nets
-		# period 1 and 3
-		p13_home_goal = (100, 0)
-		p13_away_goal = (-100, 0)
 
-		# period 2
-		p2_home_goal = (-100, 0)
-		p2_away_goal = (100, 0)
+		self.df['season'] = self.df['game_id'].astype(str).str[0:4]
 		filtered_df = self.df[self.df['shot_distance'].notnull()]
-
-		fig = plt.figure(figsize=self.fig_size)
-		sns.histplot(data=filtered_df,
-		             x=self.df['shot_distance'],
-		             hue='is_goal')
+		filtered_df['is_goal'].astype(bool)
+		fig = plt.figure(figsize=(15, 20))
+		for year_index, year in enumerate(['2018', '2019', '2020']):
+			plt.subplot(3, 1, year_index + 1)
+			ax = sns.histplot(
+				data=filtered_df[filtered_df['season'] == year],
+				x='shot_distance',
+				hue='is_goal',
+				hue_order=[False, True],
+				stat='probability',
+				kde=True,
+				multiple='stack')
+			plt.title(year)
+			ax.set_axisbelow(True)
+			ax.yaxis.grid(color='gray', linestyle='dashed')
+			plt.xticks(np.arange(0, 110, 10), rotation=20)
+			plt.legend(['Goal', 'Shot'])
+			plt.xlabel('Shot distance (ft)')
+		plt.suptitle('Shot Distance vs Probability of Scoring 2018-2020 seasons')
 		plt.show()
+		return fig
 
 
 if __name__ == "__main__":
