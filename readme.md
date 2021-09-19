@@ -1,12 +1,13 @@
-# 🚀 IFT-6758 Project
+# 🏒 IFT-6758 Project
 
-Description
+NHL Data 
 
 - [👩‍🔬👨‍🔬 Authors](#-authors)
 - [📐 Environment Variables :](#-environment-variables-)
 - [👀️ Demo](#️-demo)
 - [⚙️ Run Locally](#️-run-locally)
 - [✒️ Documentation](#️-documentation)
+- [☑️ Milestones](#️-milestones)
 - [📡 Deployment](#-deployment)
 - [🔨 Appendix](#-appendix)
 
@@ -58,6 +59,13 @@ blabla
 ## ✒️ Documentation
 
 [Documentation](https://linktodocumentation) or just write more details here
+
+
+## ☑️ Milestones
+
+1. [](https://)
+
+3.
 
 ## 📡 Deployment
 
