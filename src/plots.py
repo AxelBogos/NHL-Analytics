@@ -44,3 +44,4 @@ def shot_type_histogram() -> plt.Figure:
 	ax2.yaxis.grid(color='gray', linestyle='dashed')
 	plt.show()
 	return fig
+shot_type_histogram()
