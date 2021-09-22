@@ -1,22 +1,23 @@
 import requests
 import os
 
+RAW_DATA_PATH = './raw/'
+
 
 class HockeyDataLoader:
 	"""
 	Class handling all seasonal data loadings.
 	"""
-	def __init__(self, season_years=None, base_save_path='../data/raw/'):
+
+	def __init__(self, season_years=None, base_save_path=RAW_DATA_PATH):
 		if season_years is None:
 			season_years = ['2017', '2018', '2019', '2020']
-		assert (base_save_path.startswith("../data/raw/"))
+		assert (base_save_path.startswith(RAW_DATA_PATH))
 		self.SEASONS = season_years
 		self.base_save_path = base_save_path
 
-		if not os.path.isdir('../data/'):
-			os.mkdir('../data/')
-		if not os.path.isdir('../data/raw/'):
-			os.mkdir('../data/raw/')
+		if not os.path.isdir(self.base_save_path):
+			os.mkdir(self.base_save_path)
 
 	def get_season_data(self, year: str) -> None:
 		"""
@@ -50,9 +51,6 @@ class HockeyDataLoader:
 		game_numbers = ["%04d" % x for x in range(1, 1272)]  # 0001, 0002, .... 1271
 		regular_season = [f'{year}02{game_number}' for game_number in game_numbers]
 
-		# Check saving directories exist
-		if not os.path.isdir(self.base_save_path): os.mkdir(self.base_save_path)
-
 		# Get game data
 		for game_id in regular_season:
 			self.get_game_data(game_id, year, self.base_save_path, make_asserts=False)
@@ -80,19 +78,16 @@ class HockeyDataLoader:
 		# final
 		playoffs.extend([f"{year}0304{1}{game_number}" for game_number in range(1, 8)])
 
-		# Check saving directories exist
-		if not os.path.isdir(self.base_save_path): os.mkdir(self.base_save_path)
-
 		# Get game data
 		for game_id in playoffs:
 			self.get_game_data(game_id, year, self.base_save_path, make_asserts=False)
 
-	def get_game_data(self, game_id: str, year: str, dir_path: str, make_asserts: bool = True) -> None:
+	def get_game_data(self, game_id: str, year: str, base_save_path: str, make_asserts: bool = True) -> None:
 		"""
 		Get a single game data and save it to base_save_path/game_id.json
 		:param game_id: id of the game. See https://gitlab.com/dword4/nhlapi/-/blob/master/stats-api.md#game-ids
 		:param year: 4-digit desired season year. For example, '2017' for the 2017-2018 season.
-		:param dir_path: path of saving directory. Normally, '../data/raw/regular_season OR playoffs
+		:param base_save_path: path of saving directory. Normally, './raw/
 		:param make_asserts: boolean to determine whether or not make sanity checks. False if function is called from
 		get_season_data
 		:return: None
@@ -102,7 +97,7 @@ class HockeyDataLoader:
 			assert (2016 <= int(year) <= 2021)
 
 		# Check if file exists already
-		file_path = os.path.join(dir_path, f'{game_id}.json')
+		file_path = os.path.join(base_save_path, f'{game_id}.json')
 		if os.path.isfile(file_path):
 			return
 
