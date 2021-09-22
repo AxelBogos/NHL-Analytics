@@ -1,9 +1,8 @@
 import os.path
-
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 import pandas as pd
+import seaborn as sns
 
 TIDY_DATA_PATH = os.path.join('..', 'data', 'tidy_data.csv')
 SAVE_FIG_PATH = os.path.join('..', '..', 'figures')

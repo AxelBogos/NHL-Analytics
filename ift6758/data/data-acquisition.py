@@ -1,5 +1,5 @@
-import requests
 import os
+import requests
 
 RAW_DATA_PATH = os.path.join('raw')
 

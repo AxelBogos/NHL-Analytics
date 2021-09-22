@@ -1,8 +1,8 @@
-import json
-import pandas as pd
 import glob
+import json
 import os
-from .. utils import utils
+import pandas as pd
+from ..utils import utils
 
 RAW_DATA_PATH = os.path.join('..', 'data', 'raw')
 DATA_DIR = os.path.join('..', 'data')
@@ -67,8 +67,7 @@ class DataFrameBuilder:
 				'shot_distance': utils.get_shot_distance(event['coordinates']['x'], event['coordinates']['y'],
 				                                   event['team']['id'] == json_data['gameData']['teams']['home']['id'],
 				                                   event['about']['period']) if 'x' in event['coordinates'] and 'y' in
-				                                                                event[
-					                                                                'coordinates'] else None
+				                                                                event['coordinates'] else None
 			})
 		return game_data
 
@@ -92,5 +91,5 @@ class DataFrameBuilder:
 
 
 if __name__ == "__main__":
-	builder = DataFrameBuilder('../data/raw')
+	builder = DataFrameBuilder()
 	builder.make_dataframe()
