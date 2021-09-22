@@ -40,8 +40,8 @@ class DataFrameBuilder:
 		"""
 		game_data = []
 		if 'liveData' not in json_data or \
-				'plays' not in json_data['liveData'] or \
-				'allPlays' not in json_data['liveData']['plays']:
+			'plays' not in json_data['liveData'] or \
+			'allPlays' not in json_data['liveData']['plays']:
 			return [None] * len(self.features)
 
 		for event in json_data['liveData']['plays']['allPlays']:
