@@ -2,12 +2,19 @@ import glob
 import json
 import os
 import pandas as pd
-from ..utils import utils
+from ift6758.utils import utils
 
 RAW_DATA_PATH = os.path.join('..', 'data', 'raw')
 DATA_DIR = os.path.join('..', 'data')
 
+
 class DataFrameBuilder:
+	"""
+	Class used to build tidy dataframe from raw data.
+	!Careful! Execution of make_data_frame() is slow. main bottleneck is I/O of jsons: 91% of exec time while
+	profiling on an SSD, so not much can be done to speed it up except faster drives.
+	"""
+
 	def __init__(self, base_file_path=RAW_DATA_PATH, output_dir=DATA_DIR):
 		self.base_file_path = base_file_path
 		self.output_dir = output_dir
@@ -38,37 +45,46 @@ class DataFrameBuilder:
 		:param json_data: json data to be parsed
 		:return: returns a list of list (game shots/goals)
 		"""
-		game_data = []
+		game_data = []  # List of event dict
+		event_dict = {}  # dictionary containing all features of a shot/goal
+
+		# Verify we have all the necessary basic json keys
 		if 'liveData' not in json_data or \
-			'plays' not in json_data['liveData'] or \
-			'allPlays' not in json_data['liveData']['plays']:
+				'plays' not in json_data['liveData'] or \
+				'allPlays' not in json_data['liveData']['plays']:
 			return [None] * len(self.features)
 
 		for event in json_data['liveData']['plays']['allPlays']:
-			if event['result']['event'] != 'Goal' and event['result']['event'] != 'Shot':
+			# Only interested in goals and shots
+			if event['result']['event'] not in ('Goal', 'Shot'):
 				continue
 
-			game_data.append({
-				'game_id': json_data['gamePk'],
-				'game_time': f"{(int(event['about']['period']) - 1) * 20 + int(event['about']['periodTime'].split(':')[0])}:{event['about']['periodTime'].split(':')[1]}",
-				'period': event['about']['period'],
-				'period_time': event['about']['periodTime'],
-				'team': event['team']['name'],
-				'shooter': event['players'][0]['player']['fullName'],
-				'goalie': event['players'][-1]['player']['fullName'],
-				'is_goal': True if event['result']['event'] == 'Goal' else False,
-				'shot_type': event['result']['secondaryType'] if 'secondaryType' in event['result'] else None,
-				'x_coordinate': event['coordinates']['x'] if 'x' in event['coordinates'] else None,
-				'y_coordinate': event['coordinates']['y'] if 'y' in event['coordinates'] else None,
-				'is_empty_net': event['result']['emptyNet'] if 'emptyNet' in event['result'] else None,
-				'strength': event['result']['strength']['name'] if 'strength' in event['result'] else None,
-				'is_playoff': json_data['gameData']['game']['type'] == "P",
-				'is_home_team': event['team']['id'] == json_data['gameData']['teams']['home']['id'],
-				'shot_distance': utils.get_shot_distance(event['coordinates']['x'], event['coordinates']['y'],
-				                                   event['team']['id'] == json_data['gameData']['teams']['home']['id'],
-				                                   event['about']['period']) if 'x' in event['coordinates'] and 'y' in
-				                                                                event['coordinates'] else None
-			})
+			event_dict['game_id'] = json_data['gamePk']
+			event_dict['period'] = event['about']['period']
+			event_dict['period_time'] = event['about']['periodTime']
+			event_dict[
+				'game_time'] = f"{(int(event_dict['period']) - 1) * 20 + int(event_dict['period_time'].split(':')[0])}:" \
+			                   f"{event_dict['period_time'].split(':')[1]}"
+			event_dict['team'] = event['team']['name']
+			event_dict['shooter'] = event['players'][0]['player']['fullName']
+			event_dict['goalie'] = event['players'][-1]['player']['fullName']
+			event_dict['is_goal'] = True if event['result']['event'] == 'Goal' else False
+			event_dict['shot_type'] = event['result']['secondaryType'] if 'secondaryType' in event['result'] else None
+			event_dict['x_coordinate'] = event['coordinates']['x'] if 'x' in event['coordinates'] else None
+			event_dict['y_coordinate'] = event['coordinates']['y'] if 'y' in event['coordinates'] else None
+			event_dict['is_empty_net'] = event['result']['emptyNet'] if 'emptyNet' in event['result'] else None
+			event_dict['strength'] = event['result']['strength']['name'] if 'strength' in event['result'] else None
+			event_dict['is_playoff'] = json_data['gameData']['game']['type'] == "P"
+			event_dict['is_home_team'] = event_dict['team'] == json_data['gameData']['teams']['home']['id']
+			event_dict['shot_distance'] = utils.get_shot_distance(event_dict['x_coordinate'],
+			                                                      event_dict['y_coordinate'],
+			                                                      event_dict['is_home_team'],
+			                                                      event_dict['period']) if 'x' in event[
+				'coordinates'] and 'y' in event['coordinates'] else None
+
+			assert (len(event_dict) == len(self.features))
+			game_data.append(event_dict.copy())
+			event_dict.clear()
 		return game_data
 
 	def make_dataframe(self) -> None:
