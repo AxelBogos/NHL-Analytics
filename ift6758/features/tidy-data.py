@@ -3,8 +3,9 @@ import pandas as pd
 import glob
 import os
 from .. utils import utils
-RAW_DATA_PATH = '../data/raw/'
-DATA_DIR = '../data/'
+
+RAW_DATA_PATH = os.path.join('..', 'data', 'raw')
+DATA_DIR = os.path.join('..', 'data')
 
 class DataFrameBuilder:
 	def __init__(self, base_file_path=RAW_DATA_PATH, output_dir=DATA_DIR):

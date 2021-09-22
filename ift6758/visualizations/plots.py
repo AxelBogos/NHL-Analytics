@@ -1,10 +1,12 @@
+import os.path
+
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import pandas as pd
 
-TIDY_DATA_PATH = '../data/tidy_data.csv'
-SAVE_FIG_PATH = '../../figures/'
+TIDY_DATA_PATH = os.path.join('..', 'data', 'tidy_data.csv')
+SAVE_FIG_PATH = os.path.join('..', '..', 'figures')
 
 
 class HockeyPlotter:
@@ -52,7 +54,7 @@ class HockeyPlotter:
 		ax2.yaxis.grid(color='gray', linestyle='dashed')
 		plt.show()
 		if save_fig:
-			fig.savefig(SAVE_FIG_PATH+'shot_type_histogram.png')
+			fig.savefig(os.path.join(SAVE_FIG_PATH, 'shot_type_histogram.png'))
 		return fig
 
 	def distance_vs_goal_chance(self, save_fig = True) -> plt.Figure:
@@ -86,7 +88,7 @@ class HockeyPlotter:
 		plt.suptitle('Shot Distance vs Probability of Scoring 2018-2020 seasons')
 		plt.show()
 		if save_fig:
-			fig.savefig(SAVE_FIG_PATH+"distance_vs_goal_chance.png")
+			fig.savefig(os.path.join(SAVE_FIG_PATH, "distance_vs_goal_chance.png"))
 		return fig
 
 

@@ -1,7 +1,7 @@
 import requests
 import os
 
-RAW_DATA_PATH = './raw/'
+RAW_DATA_PATH = os.path.join('raw')
 
 
 class HockeyDataLoader:
