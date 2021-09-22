@@ -21,7 +21,7 @@ class HockeyPlotter:
 			x='shot_type',
 			data=self.df,
 			order=self.df['shot_type'].value_counts().index,
-			color='blue',
+			palette=['#7FB5D5'],
 			label='shots'
 		)
 
@@ -36,7 +36,7 @@ class HockeyPlotter:
 			x='shot_type',
 			data=self.df[self.df['is_goal'] == True],
 			order=self.df[self.df['is_goal'] == True]['shot_type'].value_counts().index,
-			color='red',
+			palette=['#FFBC7C'],
 			label='goals'
 		)
 		plt.legend(labels=['Shots', 'Goals'])
@@ -44,6 +44,8 @@ class HockeyPlotter:
 		plt.ylabel('Count of shots')
 		plt.xlabel('Type of shot')
 		plt.title('Shot & Goal Count Per Type of Shot and percent of successful goals')
+		ax1.set_axisbelow(True)
+		ax1.yaxis.grid(color='gray', linestyle='dashed')
 		ax2.set_axisbelow(True)
 		ax2.yaxis.grid(color='gray', linestyle='dashed')
 		plt.show()
@@ -51,8 +53,9 @@ class HockeyPlotter:
 
 	def distance_vs_goal_chance(self) -> plt.Figure:
 		"""
-
-		:return:
+		Plots a comparative graph across seasons (2017 - 2020) of the relationship between
+		shot distance and goals (as described in Part 5 Q2)
+		:return: a plt.Figure object instance
 		"""
 
 		self.df['season'] = self.df['game_id'].astype(str).str[0:4]
@@ -80,6 +83,8 @@ class HockeyPlotter:
 		return fig
 
 
+
 if __name__ == "__main__":
 	hockey_plotter = HockeyPlotter()
+	hockey_plotter.shot_type_histogram()
 	hockey_plotter.distance_vs_goal_chance()
