@@ -4,7 +4,7 @@ import seaborn as sns
 import pandas as pd
 
 TIDY_DATA_PATH = '../data/tidy_data.csv'
-SAVE_FIG_PATH = '../../figures'
+SAVE_FIG_PATH = '../../figures/'
 
 
 class HockeyPlotter:
@@ -12,9 +12,10 @@ class HockeyPlotter:
 		self.fig_size = fig_size
 		self.df = pd.read_csv(data_path)
 
-	def shot_type_histogram(self) -> plt.Figure:
+	def shot_type_histogram(self, save_fig=True) -> plt.Figure:
 		"""
 		Displays a shot-type histogram as described in Part 5 Question 1
+		:param save_fig: boolean to save the plot to SAVE_FIG_PATH
 		:return: a plt.Figure object instance
 		"""
 		fig = plt.figure(figsize=self.fig_size)
@@ -50,12 +51,15 @@ class HockeyPlotter:
 		ax2.set_axisbelow(True)
 		ax2.yaxis.grid(color='gray', linestyle='dashed')
 		plt.show()
+		if save_fig:
+			fig.savefig(SAVE_FIG_PATH+'shot_type_histogram.png')
 		return fig
 
-	def distance_vs_goal_chance(self) -> plt.Figure:
+	def distance_vs_goal_chance(self, save_fig = True) -> plt.Figure:
 		"""
 		Plots a comparative graph across seasons (2017 - 2020) of the relationship between
 		shot distance and goals (as described in Part 5 Q2)
+		:param save_fig: boolean to save the plot to SAVE_FIG_PATH
 		:return: a plt.Figure object instance
 		"""
 
@@ -81,6 +85,8 @@ class HockeyPlotter:
 			plt.xlabel('Shot distance (ft)')
 		plt.suptitle('Shot Distance vs Probability of Scoring 2018-2020 seasons')
 		plt.show()
+		if save_fig:
+			fig.savefig(SAVE_FIG_PATH+"distance_vs_goal_chance.png")
 		return fig
 
 
