@@ -80,10 +80,10 @@ class DataFrameBuilder:
 		json_data = self.read_all_json()
 		result = []
 		for game in json_data:
-			data = self.parse_game_data(game)
-			if data == [None] * len(self.features):  # empty row
+			game_data = self.parse_game_data(game)
+			if game_data == [None] * len(self.features):  # empty row
 				continue
-			result.extend([i for i in self.parse_game_data(game)])  # quicker than just extend
+			result.extend([i for i in game_data])  # quicker than just extend
 
 		result = pd.DataFrame(result, columns=self.features)
 
