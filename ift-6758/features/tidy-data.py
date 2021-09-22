@@ -2,16 +2,17 @@ import json
 import pandas as pd
 import glob
 import os
-from utils import get_shot_distance
-
+from .. utils import utils
+RAW_DATA_PATH = '../data/raw/'
+DATA_DIR = '../data/'
 
 class DataFrameBuilder:
-	def __init__(self, base_file_path='../data/raw/', output_dir='../data/'):
+	def __init__(self, base_file_path=RAW_DATA_PATH, output_dir=DATA_DIR):
 		self.base_file_path = base_file_path
 		self.output_dir = output_dir
 		self.features = ['game_id', 'game_time', 'period', 'period_time', 'team', 'shooter', 'goalie', 'is_goal',
 		                 'shot_type', 'x_coordinate', 'y_coordinate', 'is_empty_net', 'strength', 'is_playoff',
-		                 'is_home_team','shot_distance']
+		                 'is_home_team', 'shot_distance']
 
 	def read_json_file(self, file_path) -> dict:
 		"""
@@ -47,7 +48,7 @@ class DataFrameBuilder:
 				continue
 
 			game_data.append({
-				'game_id':json_data['gamePk'],
+				'game_id': json_data['gamePk'],
 				'game_time': f"{(int(event['about']['period']) - 1) * 20 + int(event['about']['periodTime'].split(':')[0])}:{event['about']['periodTime'].split(':')[1]}",
 				'period': event['about']['period'],
 				'period_time': event['about']['periodTime'],
@@ -62,10 +63,11 @@ class DataFrameBuilder:
 				'strength': event['result']['strength']['name'] if 'strength' in event['result'] else None,
 				'is_playoff': json_data['gameData']['game']['type'] == "P",
 				'is_home_team': event['team']['id'] == json_data['gameData']['teams']['home']['id'],
-				'shot_distance': get_shot_distance(event['coordinates']['x'], event['coordinates']['y'],
-				                  event['team']['id'] == json_data['gameData']['teams']['home']['id'],
-				                  event['about']['period']) if 'x' in event['coordinates'] and 'y' in event[
-					'coordinates'] else None
+				'shot_distance': utils.get_shot_distance(event['coordinates']['x'], event['coordinates']['y'],
+				                                   event['team']['id'] == json_data['gameData']['teams']['home']['id'],
+				                                   event['about']['period']) if 'x' in event['coordinates'] and 'y' in
+				                                                                event[
+					                                                                'coordinates'] else None
 			})
 		return game_data
 

@@ -3,11 +3,13 @@ import numpy as np
 import seaborn
 import seaborn as sns
 import pandas as pd
-from utils import get_shot_distance
+
+TIDY_DATA_PATH = '../data/tidy_data.csv'
+SAVE_FIG_PATH = '../../figures'
 
 
 class HockeyPlotter:
-	def __init__(self, fig_size=(15, 10), data_path='../data/tidy_data.csv'):
+	def __init__(self, fig_size=(15, 10), data_path=TIDY_DATA_PATH):
 		self.fig_size = fig_size
 		self.df = pd.read_csv(data_path)
 
@@ -81,7 +83,6 @@ class HockeyPlotter:
 		plt.suptitle('Shot Distance vs Probability of Scoring 2018-2020 seasons')
 		plt.show()
 		return fig
-
 
 
 if __name__ == "__main__":
