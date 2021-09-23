@@ -75,7 +75,7 @@ class DataFrameBuilder:
 			event_dict['is_empty_net'] = event['result']['emptyNet'] if 'emptyNet' in event['result'] else None
 			event_dict['strength'] = event['result']['strength']['name'] if 'strength' in event['result'] else None
 			event_dict['is_playoff'] = json_data['gameData']['game']['type'] == "P"
-			event_dict['is_home_team'] = event_dict['team'] == json_data['gameData']['teams']['home']['id']
+			event_dict['is_home_team'] = event['team']['id'] == json_data['gameData']['teams']['home']['id']
 			event_dict['shot_distance'] = utils.get_shot_distance(event_dict['x_coordinate'],
 			                                                      event_dict['y_coordinate'],
 			                                                      event_dict['is_home_team'],
