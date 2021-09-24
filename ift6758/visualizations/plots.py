@@ -99,12 +99,12 @@ class HockeyPlotter:
 		:param save_fig: boolean to save the plot to SAVE_FIG_PATH
 		:return: a plt.Figure object instance
 		"""
-		fig = plt.figure(figsize= self.fig_size)
+		fig = plt.figure(figsize=self.fig_size)
 		ax = sns.violinplot(x="shot_type",
-		               y="shot_distance",
-		               data=self.df,
-		               hue='is_goal',
-		               order=self.df[self.df['is_goal'] == True]['shot_type'].value_counts().index)
+		                    y="shot_distance",
+		                    data=self.df,
+		                    hue='is_goal',
+		                    order=self.df[self.df['is_goal'] == True]['shot_type'].value_counts().index)
 		plt.xticks(rotation=20)
 		ax.yaxis.grid(color='gray', linestyle='dashed')
 		plt.title('Types of shot ordered by number of goals')
@@ -113,9 +113,29 @@ class HockeyPlotter:
 		plt.show()
 		return fig
 
+	def distance_and_type_vs_goalv2(self, save_fig=True) -> plt.Figure:
+		"""
+		Depicts the relationship between shot-distance, shot_type and number of goals.
+		As described in part 5 question 3
+		TODO Work in progress.
+		:param save_fig: boolean to save the plot to SAVE_FIG_PATH
+		:return: a plt.Figure object instance
+		"""
+		import plotly.express as px
+
+		fig = plt.figure(figsize=self.fig_size)
+		shot_type_dict = {}
+		for index, shot in enumerate(self.df['shot_type'].unique()):
+			shot_type_dict[shot] = index
+		self.df['shot_type'].replace(shot_type_dict, inplace=True)
+		sns.jointplot(data=self.df, x='shot_type', y='shot_distance', hue='is_goal')
+		plt.show()
+
+
 
 if __name__ == "__main__":
 	hockey_plotter = HockeyPlotter()
-	hockey_plotter.shot_type_histogram()
-	hockey_plotter.distance_vs_goal_chance()
-	hockey_plotter.distance_and_type_vs_goal()
+	# hockey_plotter.shot_type_histogram()
+	# hockey_plotter.distance_vs_goal_chance()
+	# hockey_plotter.distance_and_type_vs_goal()
+	hockey_plotter.distance_and_type_vs_goalv2()

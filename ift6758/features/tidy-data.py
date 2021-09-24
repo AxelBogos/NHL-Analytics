@@ -20,7 +20,7 @@ class DataFrameBuilder:
 		self.output_dir = output_dir
 		self.features = ['game_id', 'game_time', 'period', 'period_time', 'team', 'shooter', 'goalie', 'is_goal',
 		                 'shot_type', 'x_coordinate', 'y_coordinate', 'is_empty_net', 'strength', 'is_playoff',
-		                 'is_home_team', 'shot_distance']
+		                 'is_home_team', 'shot_distance', 'home_team']
 
 	def read_json_file(self, file_path) -> dict:
 		"""
@@ -81,7 +81,7 @@ class DataFrameBuilder:
 			                                                      event_dict['is_home_team'],
 			                                                      event_dict['period']) if 'x' in event[
 				'coordinates'] and 'y' in event['coordinates'] else None
-
+			event_dict['home_team'] = json_data['gameData']['teams']['home']['name']
 			assert (len(event_dict) == len(self.features))
 			game_data.append(event_dict.copy())
 			event_dict.clear()
@@ -104,6 +104,15 @@ class DataFrameBuilder:
 		result = pd.DataFrame(result, columns=self.features)
 
 		result.to_csv(os.path.join(self.output_dir, 'tidy_data.csv'), index=False)
+
+	def get_home_offensive_side(self, result: pd.DataFrame) -> pd.DataFrame:
+		"""
+		Helper function to create the column determining on which side of the rink the home team is currently attacking.
+		Logic: Uses the average x-coordinates of goals at that specific period for a home team in their home arena
+		to determine that period's home team offensive side.
+		:param result: A complete tidy data-frame, minus the aforementioned column
+		:return: A new dataframe with the aforementioned column
+		"""
 
 
 if __name__ == "__main__":
