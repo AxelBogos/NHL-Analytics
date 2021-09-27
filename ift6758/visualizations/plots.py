@@ -121,7 +121,6 @@ class HockeyPlotter:
 		:param save_fig: boolean to save the plot to SAVE_FIG_PATH
 		:return: a plt.Figure object instance
 		"""
-		import plotly.express as px
 
 		fig = plt.figure(figsize=self.fig_size)
 		shot_type_dict = {}
@@ -131,11 +130,12 @@ class HockeyPlotter:
 		sns.jointplot(data=self.df, x='shot_type', y='shot_distance', hue='is_goal')
 		plt.show()
 
-
-
-if __name__ == "__main__":
+def main():
 	hockey_plotter = HockeyPlotter()
 	# hockey_plotter.shot_type_histogram()
 	# hockey_plotter.distance_vs_goal_chance()
 	# hockey_plotter.distance_and_type_vs_goal()
 	hockey_plotter.distance_and_type_vs_goalv2()
+
+if __name__ == "__main__":
+	main()
