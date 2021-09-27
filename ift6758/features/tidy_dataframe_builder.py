@@ -2,7 +2,7 @@ import glob
 import json
 import os
 import pandas as pd
-from ift6758.utils import utils
+from ift6758.features.feature_engineering import *
 
 RAW_DATA_PATH = os.path.join('..', 'data', 'raw')
 DATA_DIR = os.path.join('..', 'data')
@@ -15,12 +15,11 @@ class DataFrameBuilder:
 	profiling on an SSD, so not much can be done to speed it up except faster drives.
 	"""
 
-	def __init__(self, base_file_path=RAW_DATA_PATH, output_dir=DATA_DIR):
+	def __init__(self, base_file_path=RAW_DATA_PATH):
 		self.base_file_path = base_file_path
-		self.output_dir = output_dir
-		self.features = ['game_id', 'game_time', 'period', 'period_time', 'team', 'shooter', 'goalie', 'is_goal',
-		                 'shot_type', 'x_coordinate', 'y_coordinate', 'is_empty_net', 'strength', 'is_playoff',
-		                 'is_home_team', 'shot_distance', 'home_team']
+		self.features = ['game_id', 'season', 'game_time', 'period', 'period_time', 'team', 'shooter', 'goalie',
+		                 'is_goal', 'shot_type', 'x_coordinate', 'y_coordinate', 'is_empty_net',
+		                 'strength', 'is_playoff', 'home_team']
 
 	def read_json_file(self, file_path) -> dict:
 		"""
@@ -60,8 +59,10 @@ class DataFrameBuilder:
 				continue
 
 			event_dict['game_id'] = json_data['gamePk']
+			event_dict['season'] = json_data['gameData']['game']['season']
 			event_dict['period'] = event['about']['period']
 			event_dict['period_time'] = event['about']['periodTime']
+			# Total game time formatted mm:ss, no zero padding
 			event_dict[
 				'game_time'] = f"{(int(event_dict['period']) - 1) * 20 + int(event_dict['period_time'].split(':')[0])}:" \
 			                   f"{event_dict['period_time'].split(':')[1]}"
@@ -75,23 +76,18 @@ class DataFrameBuilder:
 			event_dict['is_empty_net'] = event['result']['emptyNet'] if 'emptyNet' in event['result'] else None
 			event_dict['strength'] = event['result']['strength']['name'] if 'strength' in event['result'] else None
 			event_dict['is_playoff'] = json_data['gameData']['game']['type'] == "P"
-			event_dict['is_home_team'] = event['team']['id'] == json_data['gameData']['teams']['home']['id']
-			event_dict['shot_distance'] = utils.get_shot_distance(event_dict['x_coordinate'],
-			                                                      event_dict['y_coordinate'],
-			                                                      event_dict['is_home_team'],
-			                                                      event_dict['period']) if 'x' in event[
-				'coordinates'] and 'y' in event['coordinates'] else None
 			event_dict['home_team'] = json_data['gameData']['teams']['home']['name']
+
 			assert (len(event_dict) == len(self.features))
 			game_data.append(event_dict.copy())
 			event_dict.clear()
 		return game_data
 
-	def make_dataframe(self) -> None:
+	def make_dataframe(self) -> pd.DataFrame:
 		"""
 		This function builds the complete data frame by reading all jsons and storing them in a list,
-		then parsing the data into a list of list and finally saving the equivalent pd.DataFrame as a .csv
-		:return: None
+		then parsing the data into a list of list and finally returns the dataframe
+		:return: Resulting dataframe
 		"""
 		json_data = self.read_all_json()
 		result = []
@@ -101,20 +97,20 @@ class DataFrameBuilder:
 				continue
 			result.extend([i for i in game_data])  # quicker than just extend
 
+		# Make dataframe
 		result = pd.DataFrame(result, columns=self.features)
 
-		result.to_csv(os.path.join(self.output_dir, 'tidy_data.csv'), index=False)
+		# Append engineered features
+		result = add_home_offensive_side_feature(result)
+		result = add_shot_distance_feature(result)
+		return result
 
-	def get_home_offensive_side(self, result: pd.DataFrame) -> pd.DataFrame:
-		"""
-		Helper function to create the column determining on which side of the rink the home team is currently attacking.
-		Logic: Uses the average x-coordinates of goals at that specific period for a home team in their home arena
-		to determine that period's home team offensive side.
-		:param result: A complete tidy data-frame, minus the aforementioned column
-		:return: A new dataframe with the aforementioned column
-		"""
+
+def main():
+	df_builder = DataFrameBuilder()
+	result = df_builder.make_dataframe()
+	result.to_csv(os.path.join(DATA_DIR, 'tidy_data.csv'), index=False)
 
 
 if __name__ == "__main__":
-	builder = DataFrameBuilder()
-	builder.make_dataframe()
+	main()
