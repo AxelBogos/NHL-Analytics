@@ -14,9 +14,9 @@ Description
 ## 👩‍🔬👨‍🔬 Authors[](https://)
 
 - [@Axel Bogos](https://www.github.com/AxelBogos)
--
--
--
+- [@Marc-André Gagné](https://www.github.com/Your_github_id)
+- [@Van Binh Truong](https://www.github.com/Your_github_id)
+- [@Houda Saadaoui](https://www.github.com/Your_github_id)
 
 ## 📐 Environment Variables/ Assumed dir structure, however we want to proceed :
 
@@ -28,7 +28,7 @@ To run this project, you will need to add the following environment variables to
 
 ## 👀️ Demo
 
-Insert gif or link to demo for interactive plots + blog
+Insert gif or link to demo for interactive plots **+ blog**
 
 ## ⚙️ Run Locally
 
