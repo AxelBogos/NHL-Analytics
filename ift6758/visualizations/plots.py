@@ -128,13 +128,16 @@ class HockeyPlotter:
 			shot_type_dict[shot] = index
 		self.df['shot_type'].replace(shot_type_dict, inplace=True)
 		sns.jointplot(data=self.df, x='shot_type', y='shot_distance', hue='is_goal')
+		if save_fig:
+			fig.savefig(os.path.join(SAVE_FIG_PATH, "distance_and_type_vs_goalv2.png"))
 		plt.show()
+		return fig
 
 def main():
 	hockey_plotter = HockeyPlotter()
-	# hockey_plotter.shot_type_histogram()
-	# hockey_plotter.distance_vs_goal_chance()
-	# hockey_plotter.distance_and_type_vs_goal()
+	hockey_plotter.shot_type_histogram()
+	hockey_plotter.distance_vs_goal_chance()
+	hockey_plotter.distance_and_type_vs_goal()
 	hockey_plotter.distance_and_type_vs_goalv2()
 
 if __name__ == "__main__":
