@@ -68,7 +68,10 @@ class DataFrameBuilder:
 			                   f"{event_dict['period_time'].split(':')[1]}"
 			event_dict['team'] = event['team']['name']
 			event_dict['shooter'] = event['players'][0]['player']['fullName']
-			event_dict['goalie'] = event['players'][-1]['player']['fullName']
+			if event['players'][-1]['playerType'] == "Goalie":
+				event_dict['goalie'] = event['players'][-1]['player']['fullName']
+			else:
+				event_dict['goalie'] = "" #could change to another value as needed, NaN?
 			event_dict['is_goal'] = True if event['result']['event'] == 'Goal' else False
 			event_dict['shot_type'] = event['result']['secondaryType'] if 'secondaryType' in event['result'] else None
 			event_dict['x_coordinate'] = event['coordinates']['x'] if 'x' in event['coordinates'] else None
