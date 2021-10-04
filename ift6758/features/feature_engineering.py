@@ -21,11 +21,10 @@ def add_home_offensive_side_feature(df: pd.DataFrame, inplace=False) -> pd.DataF
 	if 'home_offensive_side' in df.columns:
 		return df
 	coordinates = df[df['team'] == df['home_team']]
-	coordinates = coordinates[coordinates['is_goal'] == True]
-	coordinates = coordinates.groupby(['season', 'home_team', 'period'])['x_coordinate'].mean().reset_index()
+	coordinates = coordinates.groupby([ 'game_id', 'home_team', 'period'])['x_coordinate'].mean().reset_index()
 	coordinates['home_offensive_side'] = np.sign(coordinates['x_coordinate'])
 	coordinates = coordinates.drop(['x_coordinate'], axis=1)
-	return pd.merge(df, coordinates, on=['season', 'home_team', 'period'], how='left')
+	return pd.merge(df, coordinates, on=[ 'game_id', 'home_team', 'period'], how='left')
 
 
 def add_shot_distance_feature(df: pd.DataFrame, inplace=False) -> pd.DataFrame:
