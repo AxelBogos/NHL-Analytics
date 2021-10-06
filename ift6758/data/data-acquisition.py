@@ -11,7 +11,7 @@ class HockeyDataLoader:
 
 	def __init__(self, season_years=None, base_save_path=RAW_DATA_PATH):
 		if season_years is None:
-			season_years = ['2017', '2018', '2019', '2020']
+			season_years = ['2016', '2017', '2018', '2019', '2020']
 		assert (base_save_path.startswith(RAW_DATA_PATH))
 		self.SEASONS = season_years
 		self.base_save_path = base_save_path
@@ -27,8 +27,7 @@ class HockeyDataLoader:
 		:return: None
 		"""
 		# Sanity checks
-		assert (len(year) == 4)
-		assert (2016 <= int(year) <= 2021)
+		assert_year(year)
 
 		# Get game data
 		self.get_regular_season_data(year)
@@ -44,11 +43,11 @@ class HockeyDataLoader:
 		:return: None
 		"""
 		if make_asserts:
-			assert (len(year) == 4)
-			assert (2016 <= int(year) <= 2021)
+			assert_year(year)
 
-		# Regular Season game-ids
-		game_numbers = ["%04d" % x for x in range(1, 1272)]  # 0001, 0002, .... 1271
+		# Regular Season game-ids. 1230 games in 2016, 1271 games otherwise.
+		no_of_games = 1231 if int(year) == 2016 else 1272
+		game_numbers = ["%04d" % x for x in range(1, no_of_games)]  # 0001, 0002, .... 1271
 		regular_season = [f'{year}02{game_number}' for game_number in game_numbers]
 
 		# Get game data
@@ -65,8 +64,7 @@ class HockeyDataLoader:
 		:return: None
 		"""
 		if make_asserts:
-			assert (len(year) == 4)
-			assert (2016 <= int(year) <= 2021)
+			assert_year(year)
 
 		# Playoffs game-ids.
 		# eights of final
@@ -93,8 +91,7 @@ class HockeyDataLoader:
 		:return: None
 		"""
 		if make_asserts:
-			assert (len(year) == 4)
-			assert (2016 <= int(year) <= 2021)
+			assert_year(year)
 
 		# Check if file exists already
 		file_path = os.path.join(base_save_path, f'{game_id}.json')
@@ -117,8 +114,19 @@ class HockeyDataLoader:
 			self.get_season_data(year)
 
 
+def assert_year(year) -> None:
+	"""
+	Simple function to assert a season year is valid.
+	Extracted as a method to reduce clutter.
+	:param year: Season year as a 4-letter string (ex: '2016').
+	:return: None
+	"""
+	assert (len(year) == 4)
+	assert (2016 <= int(year) <= 2020)
+
+
 def main():
-	hockey_data_loader = HockeyDataLoader()
+	hockey_data_loader = HockeyDataLoader(['2016', '2017', '2018', '2019', '2020'])
 	hockey_data_loader.acquire_all_data()
 
 
