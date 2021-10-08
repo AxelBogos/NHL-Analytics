@@ -159,3 +159,6 @@ ipython_config.py
 
 /data
 
+# We don't want to change the environment anymore
+environment.yml
+
