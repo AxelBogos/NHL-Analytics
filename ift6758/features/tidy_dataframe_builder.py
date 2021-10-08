@@ -2,7 +2,8 @@ import glob
 import json
 import os
 import pandas as pd
-from feature_engineering import *
+from tqdm import tqdm
+from feature_engineering import add_shot_distance_feature, add_home_offensive_side_feature
 
 RAW_DATA_PATH = os.path.join('..', 'data', 'raw')
 DATA_DIR = os.path.join('..', 'data')
@@ -36,7 +37,7 @@ class DataFrameBuilder:
         :return: list of dict
         """
         json_files = glob.glob(os.path.join(self.base_file_path, '*.json'))
-        return [self.read_json_file(file) for file in json_files]
+        return [self.read_json_file(file) for file in tqdm(json_files, total=len(json_files), desc="Reading JSON files")]
 
     def parse_game_data(self, json_data) -> list:
         """
@@ -74,7 +75,7 @@ class DataFrameBuilder:
             for player in event['players']:
                 if player['playerType'] == "Goalie":
                     event_dict['goalie'] = player['player']['fullName']
-            
+
             event_dict['is_goal'] = True if event['result']['event'] == 'Goal' else False
             event_dict['shot_type'] = event['result']['secondaryType'] if 'secondaryType' in event['result'] else None
             event_dict['x_coordinate'] = event['coordinates']['x'] if 'x' in event['coordinates'] else None
@@ -86,8 +87,6 @@ class DataFrameBuilder:
             event_dict['away_team'] = json_data['gameData']['teams']['away']['name']
             event_dict['home_goal'] = event['about']['goals']['home']
             event_dict['away_goal'] = event['about']['goals']['away']
-            
-
             assert (len(event_dict) == len(self.features))
             game_data.append(event_dict.copy())
             event_dict.clear()
@@ -101,7 +100,7 @@ class DataFrameBuilder:
         """
         json_data = self.read_all_json()
         result = []
-        for game in json_data:
+        for game in tqdm(json_data, total=len(json_data), desc="Building Dataframe"):
             game_data = self.parse_game_data(game)
             if game_data == [None] * len(self.features):  # empty row
                 continue
@@ -109,7 +108,7 @@ class DataFrameBuilder:
 
         # Make dataframe
         result = pd.DataFrame(result, columns=self.features)
-
+        print('Append Engineered Features and save csv...')
         # Append engineered features
         result = add_home_offensive_side_feature(result)
         result = add_shot_distance_feature(result)
