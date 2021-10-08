@@ -1,5 +1,6 @@
 import os
 import requests
+from tqdm import tqdm
 
 RAW_DATA_PATH = os.path.join('raw')
 
@@ -45,13 +46,19 @@ class HockeyDataLoader:
         if make_asserts:
             assert_year(year)
 
-        # Regular Season game-ids. 1230 games in 2016, 1271 games otherwise.
-        no_of_games = 1231 if int(year) == 2016 else 1272
+        # Regular Season game-ids
+        if year == '2016':
+            no_of_games = 1231  # 1230 matches in 2016, a new team was introduced after
+        elif year == '2020':
+            no_of_games = 869  # 868 matches in 2020 because of covid
+        else:
+            no_of_games = 1272
+
         game_numbers = ["%04d" % x for x in range(1, no_of_games)]  # 0001, 0002, .... 1271
         regular_season = [f'{year}02{game_number}' for game_number in game_numbers]
 
         # Get game data
-        for game_id in regular_season:
+        for game_id in tqdm(regular_season,total=len(regular_season), desc=f"Regular {year}-{int(year)+1} Season Matches"):
             self.get_game_data(game_id, year, self.base_save_path, make_asserts=False)
 
     def get_playoffs_data(self, year: str, make_asserts: bool = True) -> None:
@@ -77,7 +84,7 @@ class HockeyDataLoader:
         playoffs.extend([f"{year}0304{1}{game_number}" for game_number in range(1, 8)])
 
         # Get game data
-        for game_id in playoffs:
+        for game_id in tqdm(playoffs, total=len(playoffs), desc=f"Playoff {year}-{int(year)+1} Season Matches"):
             self.get_game_data(game_id, year, self.base_save_path, make_asserts=False)
 
     def get_game_data(self, game_id: str, year: str, base_save_path: str, make_asserts: bool = True) -> None:
