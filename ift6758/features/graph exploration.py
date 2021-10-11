@@ -5,6 +5,7 @@ Created on Sun Oct 10 10:07:11 2021
 @author: Marc-André
 """
 
+
 import pandas as pd
 import numpy as np
 import os
@@ -76,7 +77,5 @@ ax.clabel(cset, inline=1, fontsize=10)
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 fig.colorbar(cfset)
-cfset.set_clim(-0.03,0.03)
+cfset.set_clim(-0.03,0.03)#need to find a way to centralise white = 0
 plt.show()
-
-
