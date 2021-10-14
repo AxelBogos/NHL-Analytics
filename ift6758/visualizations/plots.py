@@ -82,14 +82,16 @@ class HockeyPlotter:
 		for year_index, year in enumerate(['20182019', '20192020', '20202021']):
 			plt.subplot(3, 1, year_index + 1)
 
-			ax = sns.lineplot(x='shot_distance',y='is_goal', data=filtered_df)
+			ax = sns.lineplot(x='shot_distance', y='is_goal',
+			                  data=filtered_df[filtered_df['season'].astype(str) == year])
 			plt.title(f'{year[0:4]} - {year[4::]} season')
 			ax.set_axisbelow(True)
 			ax.yaxis.grid(color='gray', linestyle='dashed')
 			plt.xticks(np.arange(0, 210, 10), rotation=20)
 			plt.xlabel('Shot distance (ft)')
 			plt.ylabel('Goal Probability')
-		plt.suptitle('Shot Distance vs Goal Probability (95% CI) \n 2018-19, 2019-20, 2020-21 seasons', size=14,y=0.935)
+		plt.suptitle('Shot Distance vs Goal Probability (95% CI) \n 2018-19, 2019-20, 2020-21 seasons', size=14,
+		             y=0.935)
 		plt.show()
 		if save_fig:
 			fig.savefig(os.path.join(SAVE_FIG_PATH, "Q5-2_distance_vs_goal_chance.png"))
@@ -107,31 +109,31 @@ class HockeyPlotter:
 		filtered_data = df.dropna(subset=["shot_type", "shot_distance"]).copy()
 		filtered_data = filtered_data[filtered_data["season"].astype(str) == season].copy()
 		filtered_data.loc["shot_distance"] = filtered_data["shot_distance"].round(0)
-		
+
 		plot_data = filtered_data.groupby(["shot_distance", "shot_type"])["is_goal"].mean().to_frame().reset_index()
 		plot_data = plot_data[plot_data["shot_distance"] <= 100]
 		plot_data["shot_distance"] = plot_data["shot_distance"].round(0)
-		
-		hist_data =  filtered_data[["shot_distance", "shot_type", "game_id"]].groupby(["shot_distance", "shot_type"]).count().reset_index().copy()
+
+		hist_data = filtered_data[["shot_distance", "shot_type", "game_id"]].groupby(
+			["shot_distance", "shot_type"]).count().reset_index().copy()
 		hist_data = hist_data[hist_data["shot_distance"] <= 100].copy()
 		dict_hist = {}
-		
+
 		for i, shot_type in enumerate(hist_data["shot_type"].unique()):
-			dict_hist[i] = hist_data[hist_data["shot_type"]==shot_type][["shot_distance","game_id"]].copy()
-		
+			dict_hist[i] = hist_data[hist_data["shot_type"] == shot_type][["shot_distance", "game_id"]].copy()
+
 		g = sns.relplot(data=plot_data, x="shot_distance", y="is_goal", col="shot_type",
 		                kind="line", linewidth=1, col_wrap=2, ci=0, facet_kws={'sharey': False, 'sharex': False})
-		
-		
-		i=0
+
+		i = 0
 		for ax in g.axes.flat:
 			ax2 = ax.twinx()
-			sns.histplot(data =dict_hist[i] , x= "shot_distance", bins = 100, ax= ax2, alpha= 0.3)
+			sns.histplot(data=dict_hist[i], x="shot_distance", bins=100, ax=ax2, alpha=0.1)
 			ax.set_xlabel("shot_distance")
 			ax.set_ylabel("goal probability")
 			ax.set_xticks([0, 20, 40, 60, 80, 100])
 			ax.set_yticks([0.2, 0.4, 0.6, 0.8, 1.0])
-			ax2.set_yticks([ 10, 20, 30, 40, 50, 60])
+			ax2.set_yticks([10, 20, 30, 40, 50, 60])
 			ax2.set_xticks([0, 20, 40, 60, 80, 100])
 			ax2.set_ylabel('number of shot')
 			i += 1
@@ -144,7 +146,6 @@ class HockeyPlotter:
 		return g
 
 
-
 def main():
 	df = pd.read_csv(TIDY_DATA_PATH)
 	hockey_plotter = HockeyPlotter()
@@ -154,6 +155,7 @@ def main():
 	hockey_plotter.distance_vs_goal_chance(df)
 	# Plot Q5.3
 	hockey_plotter.distance_and_type_vs_goal(df)
+
 
 if __name__ == "__main__":
 	main()
