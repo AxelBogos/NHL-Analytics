@@ -106,17 +106,36 @@ class HockeyPlotter:
 		"""
 		filtered_data = df.dropna(subset=["shot_type", "shot_distance"]).copy()
 		filtered_data = filtered_data[filtered_data["season"].astype(str) == season].copy()
-		filtered_data["shot_distance"] = filtered_data["shot_distance"].round(0)
+		filtered_data.loc["shot_distance"] = filtered_data["shot_distance"].round(0)
+		
 		plot_data = filtered_data.groupby(["shot_distance", "shot_type"])["is_goal"].mean().to_frame().reset_index()
 		plot_data = plot_data[plot_data["shot_distance"] <= 100]
+		plot_data["shot_distance"] = plot_data["shot_distance"].round(0)
+		
+		hist_data =  filtered_data[["shot_distance", "shot_type", "game_id"]].groupby(["shot_distance", "shot_type"]).count().reset_index().copy()
+		hist_data = hist_data[hist_data["shot_distance"] <= 100].copy()
+		dict_hist = {}
+		
+		for i, shot_type in enumerate(hist_data["shot_type"].unique()):
+			dict_hist[i] = hist_data[hist_data["shot_type"]==shot_type][["shot_distance","game_id"]].copy()
+		
 		g = sns.relplot(data=plot_data, x="shot_distance", y="is_goal", col="shot_type",
-		                kind="line", linewidth=1, col_wrap=2, facet_kws={'sharey': False, 'sharex': False})
+		                kind="line", linewidth=1, col_wrap=2, ci=0, facet_kws={'sharey': False, 'sharex': False})
+		
+		
+		i=0
 		for ax in g.axes.flat:
+			ax2 = ax.twinx()
+			sns.histplot(data =dict_hist[i] , x= "shot_distance", bins = 100, ax= ax2, alpha= 0.3)
 			ax.set_xlabel("shot_distance")
 			ax.set_ylabel("goal probability")
 			ax.set_xticks([0, 20, 40, 60, 80, 100])
 			ax.set_yticks([0.2, 0.4, 0.6, 0.8, 1.0])
-		plt.subplots_adjust(hspace=0.2)
+			ax2.set_yticks([ 10, 20, 30, 40, 50, 60])
+			ax2.set_xticks([0, 20, 40, 60, 80, 100])
+			ax2.set_ylabel('number of shot')
+			i += 1
+		plt.subplots_adjust(hspace=0.2, wspace=0.3)
 		g.fig.subplots_adjust(top=0.95)
 		g.fig.suptitle('Probability of Scoring Based on Shot Distance for Season 2017')
 		plt.show()
