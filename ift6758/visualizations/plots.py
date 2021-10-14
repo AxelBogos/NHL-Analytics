@@ -121,7 +121,7 @@ class HockeyPlotter:
 		g.fig.suptitle('Probability of Scoring Based on Shot Distance for Season 2017')
 		plt.show()
 		if save_fig:
-			plt.savefig(os.path.join(SAVE_FIG_PATH, "Q5-3_distance_and_type_vs_goal.png"))
+			g.savefig(os.path.join(SAVE_FIG_PATH, "Q5-3_distance_and_type_vs_goal.png"))
 		return g
 
 
