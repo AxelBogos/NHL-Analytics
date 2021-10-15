@@ -3,7 +3,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter
 import os
 
-DATA_DIR = os.path.join("..", "ift6758", "data")
+DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "ift6758", "data")
 
 
 def compute_league_avg(df: pd.DataFrame, year: int) -> np.array:

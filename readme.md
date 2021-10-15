@@ -14,58 +14,55 @@ Description
 ## 👩‍🔬👨‍🔬 Authors[](https://)
 
 - [@Axel Bogos](https://www.github.com/AxelBogos)
-- [@Marc-André Gagné](https://www.github.com/Your_github_id)
-- [@Van Binh Truong](https://www.github.com/Your_github_id)
-- [@Houda Saadaoui](https://www.github.com/Your_github_id)
+- [@Marc-André Gagné](https://www.github.com/MAGjagger)
+- [@Van Binh Truong](https://www.github.com/VanBinhTruong)
+- [@Houda Saadaoui](https://www.github.com/houdasaad)
 
-## 📐 Environment Variables/ Assumed dir structure, however we want to proceed :
-
-To run this project, you will need to add the following environment variables to your .env file
-
-`THING1`
-
-`THING2`
 
 ## 👀️ Demo
-
-Insert gif or link to demo for interactive plots **+ blog**
+-> See interactive plot in `figures/Q6_plot.html` <br>
+-> Blog post repo [here!](https://github.com/MAGjagger/ift6758-Blog)
 
 ## ⚙️ Run Locally
 
-Clone the project
+1. Clone the project
 
 ```bash
   git clone https://github.com/AxelBogos/IFT6758-Project.git
 ```
 
-Go to the project directory
+2. Go to the project directory
 
 ```bash
   cd project
 ```
 
-Get the data, either by running
+3. Install virtual environment
+
+```bash
+conda env create --name YOUR_ENV_NAME --file=environment.yml
+conda activate YOUR_ENV_NAME   
+```
+4. Get the data (~3.15Gb)
 
 ```python
-python src/data-acquisition.py
-python src/tidy-data.pu
+python ift6758/data/data-acquisition.py
 ```
 
-*OR*
+5. Run tidy data script (~5-10 min depending on your I/O speed)
 
-download the data directory from [here](https://drive.google.com/drive/folders/1joAB2DbjVjC8eyHsURIbO9qqR5ZJNXZL?usp=sharing) and place the whole directory under the project root (i.e. ```.../Project/data/```)
-
-Install virtual environment
-
-```bash
-  conda blabla
+```python
+python ift6758/features/tidy_dataframe_builder.py
 ```
 
-Run scripts / launch notebook or whatever
+6. Run Plotting Functions
 
-```bash
-blabla
+```python
+python ift6758/visualizations/plots.py
 ```
+
+7. Have fun exploring any notebook and figures in 
+`./notebooks` and `./figures`
 
 ## ✒️ Documentation
 
@@ -73,18 +70,30 @@ blabla
 
 ## ☑️ Milestones
 
-1. [](https://)
-2. [](https://)
-3.
+- [x] Milestone 1 - October 15 2021, 11:59PM
+- [ ] Milestone 2 - TBA
+- [ ] Milestone 3 - TBA
 
 ## 📡 Deployment
 
-Details about the github pages deploy
+1. Blog post repo [here!](https://github.com/MAGjagger/ift6758-Blog)
+
+2. Clone the project
 
 ```bash
-  npm run deploy
+  git clone https://github.com/AxelBogos/IFT6758-Project.git
+```
+3. Go to the project directory
+
+```bash
+  cd project
+```
+
+4. Execute the server. See [here](https://github.com/MAGjagger/ift6758-Blog/blob/main/README.md) for more details about the jekyll installation. 
+```bash
+  bundle exec jekyll serve
 ```
 
 ## 🔨 Appendix
 
-Any additional information goes here
+TBA
