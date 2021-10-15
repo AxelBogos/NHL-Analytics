@@ -55,6 +55,8 @@ def add_shot_distance_feature(df: pd.DataFrame, inplace=False) -> pd.DataFrame:
             goal_coord = -1 * home_offensive_side * goal_coord
         return np.linalg.norm(np.array([x, y]) - goal_coord)
 
+    if not inplace:
+        df = df.copy()
     df['shot_distance'] = df.apply(lambda row: compute_net_distance(
         row['x_coordinate'],
         row['y_coordinate'],
