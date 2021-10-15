@@ -5,8 +5,8 @@ import pandas as pd
 from tqdm import tqdm
 from feature_engineering import add_shot_distance_feature, add_home_offensive_side_feature
 
-RAW_DATA_PATH = os.path.join('..', 'data', 'raw')
-DATA_DIR = os.path.join('..', 'data')
+RAW_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'raw')
+DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
 
 
 class DataFrameBuilder:

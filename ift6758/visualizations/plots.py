@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-TIDY_DATA_PATH = os.path.join('..', 'data', 'tidy_data.csv')
-SAVE_FIG_PATH = os.path.join('..', '..', 'figures')
+TIDY_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'tidy_data.csv')
+SAVE_FIG_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'figures')
 
 
 class HockeyPlotter:
@@ -88,6 +88,7 @@ class HockeyPlotter:
 			ax.set_axisbelow(True)
 			ax.yaxis.grid(color='gray', linestyle='dashed')
 			plt.xticks(np.arange(0, 210, 10), rotation=20)
+			plt.yticks(np.arange(0,1.2,0.2))
 			plt.xlabel('Shot distance (ft)')
 			plt.ylabel('Goal Probability')
 		plt.suptitle('Shot Distance vs Goal Probability \n 2018-19, 2019-20, 2020-21 seasons', size=14,

@@ -2,7 +2,7 @@ import os
 import requests
 from tqdm import tqdm
 
-RAW_DATA_PATH = os.path.join('raw')
+RAW_DATA_PATH = os.path.join(os.path.dirname(__file__), 'raw')
 
 
 class HockeyDataLoader:
