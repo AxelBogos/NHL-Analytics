@@ -59,7 +59,7 @@ class HockeyDataLoader:
 
         # Get game data
         for game_id in tqdm(regular_season,total=len(regular_season), desc=f"Regular {year}-{int(year)+1} Season Matches"):
-            self.get_game_data(game_id, year, self.base_save_path, make_asserts=False)
+            self.get_game_data(game_id, year, make_asserts=False)
 
     def get_playoffs_data(self, year: str, make_asserts: bool = True) -> None:
         """
@@ -85,14 +85,13 @@ class HockeyDataLoader:
 
         # Get game data
         for game_id in tqdm(playoffs, total=len(playoffs), desc=f"Playoff {year}-{int(year)+1} Season Matches"):
-            self.get_game_data(game_id, year, self.base_save_path, make_asserts=False)
+            self.get_game_data(game_id, year, make_asserts=False)
 
-    def get_game_data(self, game_id: str, year: str, base_save_path: str, make_asserts: bool = True) -> None:
+    def get_game_data(self, game_id: str, year: str,  make_asserts: bool = True) -> None:
         """
         Get a single game data and save it to base_save_path/game_id.json
         :param game_id: id of the game. See https://gitlab.com/dword4/nhlapi/-/blob/master/stats-api.md#game-ids
         :param year: 4-digit desired season year. For example, '2017' for the 2017-2018 season.
-        :param base_save_path: path of saving directory. Normally, './raw/
         :param make_asserts: boolean to determine whether or not make sanity checks. False if function is called from
         get_season_data
         :return: None
@@ -101,7 +100,7 @@ class HockeyDataLoader:
             assert_year(year)
 
         # Check if file exists already
-        file_path = os.path.join(base_save_path, f'{game_id}.json')
+        file_path = os.path.join(self.base_save_path, f'{game_id}.json')
         if os.path.isfile(file_path):
             return
 
