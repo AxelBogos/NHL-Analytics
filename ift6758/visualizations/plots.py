@@ -90,7 +90,7 @@ class HockeyPlotter:
 			plt.xticks(np.arange(0, 210, 10), rotation=20)
 			plt.xlabel('Shot distance (ft)')
 			plt.ylabel('Goal Probability')
-		plt.suptitle('Shot Distance vs Goal Probability (95% CI) \n 2018-19, 2019-20, 2020-21 seasons', size=14,
+		plt.suptitle('Shot Distance vs Goal Probability \n 2018-19, 2019-20, 2020-21 seasons', size=14,
 		             y=0.935)
 		plt.show()
 		if save_fig:
