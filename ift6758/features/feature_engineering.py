@@ -122,7 +122,7 @@ def add_shot_angle(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
 
 def add_change_in_shot_angle(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
     """
-    **THIS FUNCTION IS REALLY UNOPTIMIZED AND REALLY SLOW**.
+    **This function is pretty slow because of iterrows(). I'd be happy to change it, but no ideas currently.**.
     Function to create the column determining on which side of the rink the home team is currently attacking.
     -1 if the net the home team scores into is in the negative x-coordinates, +1 if they score in the net
     in the positive x-coordinates.
@@ -132,10 +132,8 @@ def add_change_in_shot_angle(df: pd.DataFrame, inplace: bool = False) -> pd.Data
     """
     if not inplace:
         df = df.copy()
-    for index, row in df.iterrows():
-        if not (row['is_rebound'] and row['prev_event_type'] == 'Shot'):
-            df.loc[index, 'change_in_angle'] = 0
-        else:
-            prev_angle = df.iloc[index - 1]['shot_angle']
-            df.loc[index, 'change_in_angle'] = np.abs(row['shot_angle'] - prev_angle)
+    df['change_in_angle'] = 0
+    for index, row in df.loc[(df['is_rebound']) & (df['prev_event_type'] == 'Shot')].iterrows():
+        prev_angle = df.iloc[index - 1]['shot_angle']
+        df.loc[index, 'change_in_angle'] = np.abs(row['shot_angle'] - prev_angle)
     return df
