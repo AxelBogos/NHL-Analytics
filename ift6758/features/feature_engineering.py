@@ -77,7 +77,7 @@ def add_shot_angle(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
     def single_shot_angle(x: float, y: float, team: str, home_team: str, home_offensive_side: int) -> float:
         """
         Helper function. Computes and returns the angle between the xy shooter coordinates
-        and the net they are scoring into based on "home_offensive_side".
+        and the net they are scoring into based on "home_offensive_side" relative to the center line of the net.
         :param x: shooter x-coordinate
         :param y: shooter y-coordinate
         :param team: shooter's team
@@ -123,9 +123,8 @@ def add_shot_angle(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
 def add_change_in_shot_angle(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
     """
     **This function is pretty slow because of iterrows(). I'd be happy to change it, but no ideas currently.**.
-    Function to create the column determining on which side of the rink the home team is currently attacking.
-    -1 if the net the home team scores into is in the negative x-coordinates, +1 if they score in the net
-    in the positive x-coordinates.
+    Function to create the column determining the absolute value of the change in angle relative to the center line
+    between two consecutive shots.
     :param df: A complete tidy data-frame
     :param inplace: Boolean determining whether the feature is added in place
     :return: A dataframe with the aforementioned column
