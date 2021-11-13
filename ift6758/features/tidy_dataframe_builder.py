@@ -6,6 +6,7 @@ from tqdm import tqdm
 import numpy as np
 from feature_engineering import add_shot_distance_feature, add_home_offensive_side_feature, add_shot_angle,\
     add_change_in_shot_angle
+from datetime import datetime
 
 RAW_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'raw')
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
@@ -148,7 +149,7 @@ class DataFrameBuilder:
         # Make dataframe
         result = pd.DataFrame(result, columns=self.features)
         # Append engineered features
-        print('Append home offensive side feature...')
+        print('Append home offensive side feature... ')
         result = add_home_offensive_side_feature(result)
         print('Append shot distance feature...')
         result = add_shot_distance_feature(result)
@@ -162,8 +163,8 @@ class DataFrameBuilder:
 def main():
     df_builder = DataFrameBuilder()
     result = df_builder.make_dataframe()
+    print('Save CSV...')
     result.to_csv(os.path.join(DATA_DIR, 'tidy_data.csv'), index=False)
-
 
 if __name__ == "__main__":
     main()
