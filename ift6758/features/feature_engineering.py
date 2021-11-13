@@ -100,12 +100,12 @@ def add_shot_angle(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
             if (np.sign(relative_x)) == 1:  # front of the goal
                 angle = np.arctan(np.abs(y) / relative_x)
             elif (np.sign(relative_x)) == -1:  # behind the goal
-                angle = np.arctan(np.abs(relative_x) / y) + 90
+                angle = np.arctan(np.abs(relative_x) / y) + np.pi/2  # +90 degrees to account its from behind
         elif np.sign(goal_coord[0]) == 1:  # right goal
             if (np.sign(relative_x)) == -1:  # front of the goal
                 angle = np.arctan(np.abs(y) / np.abs(relative_x))
             elif (np.sign(relative_x)) == 1:  # behind the goal
-                angle = np.arctan(relative_x / y) + 90
+                angle = np.arctan(relative_x / y) + np.pi/2  # +90 degrees to account its from behind
         return np.rad2deg(angle)
 
     if not inplace:
