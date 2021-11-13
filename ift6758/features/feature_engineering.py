@@ -122,7 +122,10 @@ def add_shot_angle(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
 
 def add_change_in_shot_angle(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
     """
-    **This function is pretty slow because of iterrows(). I'd be happy to change it, but no ideas currently.**.
+    **This function is really slow because of iterrows(). I'd be happy to change it, but I haven't found out yet an
+     idea for how to vectorize the iteration based on a row and the previous one for now. Takes about ~3.5 mins to run,
+     while other feature engineering functions take < 10seconds **.
+
     Function to create the column determining the absolute value of the change in angle relative to the center line
     between two consecutive shots.
     :param df: A complete tidy data-frame
