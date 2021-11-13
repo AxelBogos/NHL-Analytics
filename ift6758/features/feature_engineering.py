@@ -94,30 +94,17 @@ def add_shot_angle(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
             goal_coord = -1 * home_offensive_side * goal_coord
 
         relative_x = x - goal_coord[0]  # bring x-coordinate relative to the goal
-        angle = 0  # Defaults to 0 if x = [-89 or 89]. That's actually common
+        angle = 0  # Defaults to 0 if x = [-89 or 89]. That's actually common.
         y += 1e-5  # avoid division by zero
         if np.sign(goal_coord[0]) == -1:  # left goal
             if (np.sign(relative_x)) == 1:  # front of the goal
-                # if int(y) == 0:
-                #     angle = 0
-                # else:
                 angle = np.arctan(np.abs(y) / relative_x)
             elif (np.sign(relative_x)) == -1:  # behind the goal
-                # if int(y) == 0:
-                #     angle = 180
-                # else:
                 angle = np.arctan(np.abs(relative_x) / y) + 90
-
         elif np.sign(goal_coord[0]) == 1:  # right goal
             if (np.sign(relative_x)) == -1:  # front of the goal
-                # if int(y) == 0:
-                #     angle = 0
-                # else:
                 angle = np.arctan(np.abs(y) / np.abs(relative_x))
             elif (np.sign(relative_x)) == 1:  # behind the goal
-                # if int(y) == 0:
-                #     angle = 180
-                # else:
                 angle = np.arctan(relative_x / y) + 90
         return np.rad2deg(angle)
 

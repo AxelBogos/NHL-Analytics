@@ -147,11 +147,14 @@ class DataFrameBuilder:
 
         # Make dataframe
         result = pd.DataFrame(result, columns=self.features)
-        print('Append Engineered Features and save csv...')
         # Append engineered features
+        print('Append home offensive side feature...')
         result = add_home_offensive_side_feature(result)
+        print('Append shot distance feature...')
         result = add_shot_distance_feature(result)
+        print('Append shot angle feature...')
         result = add_shot_angle(result)
+        print('Append change in shot angle distance feature...')
         result = add_change_in_shot_angle(result)
         return result
 
