@@ -5,14 +5,14 @@ Description
 
 - [👩‍🔬👨‍🔬 Authors](#-authors)
 - [👀️ Demo](#️-demo)
-- [📐 Environment Variables](#-environment-variables-)
+- [📐 Environment Variables](#-environment-variables)
 - [⚙️ Run Locally](#️-run-locally)
 - [✒️ Documentation](#️-documentation)
 - [☑️ Milestones](#️-milestones)
 - [📡 Deployment](#-deployment)
 - [🔨 Appendix](#-appendix)
 
-## 👩‍🔬👨‍🔬 Authors[](https://)
+## 👩‍🔬👨‍🔬 Authors
 
 - [@Axel Bogos](https://www.github.com/AxelBogos)
 - [@Marc-André Gagné](https://www.github.com/MAGjagger)
