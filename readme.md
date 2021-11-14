@@ -4,8 +4,8 @@
 Description
 
 - [👩‍🔬👨‍🔬 Authors](#-authors)
-- [📐 Environment Variables](#-environment-variables-)
 - [👀️ Demo](#️-demo)
+- [📐 Environment Variables](#-environment-variables-)
 - [⚙️ Run Locally](#️-run-locally)
 - [✒️ Documentation](#️-documentation)
 - [☑️ Milestones](#️-milestones)
@@ -23,6 +23,9 @@ Description
 ## 👀️ Demo
 -> See interactive plot in `figures/Q6_plot.html` <br>
 -> Blog post repo [here!](https://github.com/MAGjagger/ift6758-Blog)
+
+## 📐 Environment Variables
+- `COMET_API_KEY` : Your personal API key to use *comet.ml*. Create a free acount and see `Account -> Settings -> Developer Information`
 
 ## ⚙️ Run Locally
 
@@ -72,7 +75,7 @@ python ift6758/visualizations/plots.py
 ## ☑️ Milestones
 
 - [x] Milestone 1 - October 15 2021, 11:59PM
-- [ ] Milestone 2 - TBA
+- [ ] Milestone 2 - November 26 2021, 11:59PM
 - [ ] Milestone 3 - TBA
 
 ## 📡 Deployment
@@ -82,7 +85,7 @@ python ift6758/visualizations/plots.py
 2. Clone the project
 
 ```bash
-  git clone https://github.com/AxelBogos/IFT6758-Project.git
+  git clone https://github.com/MAGjagger/ift6758-Blog.git
 ```
 3. Go to the project directory
 
