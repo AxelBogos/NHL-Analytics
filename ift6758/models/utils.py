@@ -10,7 +10,8 @@ DEFAULT_TEST_SEASONS = ['20202021']
 
 
 def load_data(features: List[str], train_val_seasons: List[str] = None, test_season: List[str] = None,
-              train_val_ratio: float = 0.2, target: str = 'is_goal', use_standard_scaler: bool = True) -> tuple:
+              train_val_ratio: float = 0.2, target: str = 'is_goal', use_standard_scaler: bool = True,
+              return_as_dataframes: bool = True, drop_all_na: bool = True) -> tuple:
     """
     Loads the dataset, drops all but the desired features and target var and returns the train_val_test split.
     :param features: List of features to be used as strings. Ex: ['shot_distance']
@@ -19,6 +20,8 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
     :param train_val_ratio: Ratio of the train and val sets. Default: 0.2
     :param target: Target feature for classification/prediction.
     :param use_standard_scaler: Boolean to determine whether or not to scale features with SkLearn StandardScaler()
+    :param return_as_dataframes: True to returns datasets as pd.DataFrame/Series, False to return as np.arrays
+    :param drop_all_na: True to drop all rows with a NAN feature. False to do no such processing
     :return: X_train, y_train, X_val, y_val, X_test, y_test as tuple
     """
     assert features, 'Must provide training features'
@@ -28,10 +31,18 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
         test_season = DEFAULT_TEST_SEASONS
     df = pd.read_csv(TIDY_DATA_PATH)
 
+    # Convert to numeric classes
+    df[target] = df[target].astype(int)
+
     train_val = df[df['season'].astype(str).isin(train_val_seasons)]
     val = train_val.sample(frac=train_val_ratio, random_state=123)
     train = train_val.drop(val.index)
     test = df[df['season'].astype(str).isin(test_season)]
+
+    if drop_all_na:
+        train = train.dropna(subset=features)
+        val = val.dropna(subset=features)
+        test = test.dropna(subset=features)
 
     X_train, y_train = train.drop(train.columns.difference(features), axis=1), train[target]
     X_val, y_val = val.drop(val.columns.difference(features), axis=1), val[target]
@@ -42,5 +53,10 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
         X_train = scaler.fit_transform(X_train)
         X_val = scaler.transform(X_val)
         X_test = scaler.transform(X_test)
+
+    if return_as_dataframes:
+        X_train, y_train = pd.DataFrame(data=X_train, columns=features), pd.Series(y_train, name=target)
+        X_val, y_val = pd.DataFrame(data=X_val, columns=features), pd.Series(y_val, name=target)
+        X_test, y_test = pd.DataFrame(data=X_test, columns=features), pd.Series(y_test, name=target)
 
     return X_train, y_train, X_val, y_val, X_test, y_test
