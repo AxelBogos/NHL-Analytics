@@ -34,6 +34,7 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
     # Convert to numeric classes
     df[target] = df[target].astype(int)
 
+    # Split train-val-test by seasons
     train_val = df[df['season'].astype(str).isin(train_val_seasons)]
     val = train_val.sample(frac=train_val_ratio, random_state=123)
     train = train_val.drop(val.index)
