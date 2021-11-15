@@ -12,7 +12,7 @@ class HockeyPlotter:
 	def __init__(self, fig_size=(15, 10)):
 		self.fig_size = fig_size
 
-	def shot_type_histogram(self, df, season: str = '20192020', save_fig: bool = True) -> plt.Figure:
+	def milestone1_shot_type_histogram(self, df, season: str = '20192020', save_fig: bool = True) -> plt.Figure:
 		"""
 		Displays a shot-type histogram as described in Part 5 Question 1
 		:param df: tidy pandas.DataFrame
@@ -65,7 +65,7 @@ class HockeyPlotter:
 			fig.savefig(os.path.join(SAVE_FIG_PATH, 'Q5-1_shot_type_histogram.png'))
 		return fig
 
-	def distance_vs_goal_chance(self, df, save_fig=True) -> plt.Figure:
+	def milestone1_distance_vs_goal_chance(self, df, save_fig=True) -> plt.Figure:
 		"""
 		Plots a comparative graph across seasons (2017 - 2020) of the relationship between
 		shot distance and goals (as described in Part 5 Q2)
@@ -98,7 +98,7 @@ class HockeyPlotter:
 			fig.savefig(os.path.join(SAVE_FIG_PATH, "Q5-2_distance_vs_goal_chance.png"))
 		return fig
 
-	def distance_and_type_vs_goal(self, df, season: str = '20172018', save_fig=True) -> plt.Figure:
+	def milestone1_distance_and_type_vs_goal(self, df, season: str = '20172018', save_fig=True) -> plt.Figure:
 		"""
 		Depicts the relationship between shot-distance, shot_type and number of goals.
 		As described in part 5 question 3
@@ -147,15 +147,22 @@ class HockeyPlotter:
 		return g
 
 
+
 def main():
 	df = pd.read_csv(TIDY_DATA_PATH)
+
 	hockey_plotter = HockeyPlotter()
-	# Plot Q5.1
-	hockey_plotter.shot_type_histogram(df)
-	# Plot Q5.2
-	hockey_plotter.distance_vs_goal_chance(df)
-	# Plot Q5.3
-	hockey_plotter.distance_and_type_vs_goal(df)
+
+	# ---- Milestone 1 Plots ----
+	# # Plot Q5.1
+	# hockey_plotter.milestone1_shot_type_histogram(df)
+	# # Plot Q5.2
+	# hockey_plotter.milestone1_distance_vs_goal_chance(df)
+	# # Plot Q5.3
+	# hockey_plotter.milestone1_distance_and_type_vs_goal(df)
+
+	# ---- Milestone 2 Plots ----
+
 
 
 if __name__ == "__main__":

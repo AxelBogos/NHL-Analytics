@@ -3,7 +3,10 @@ import json
 import os
 import pandas as pd
 from tqdm import tqdm
-from feature_engineering import add_shot_distance_feature, add_home_offensive_side_feature
+import numpy as np
+from feature_engineering import add_shot_distance_feature, add_home_offensive_side_feature, add_shot_angle,\
+    add_change_in_shot_angle
+from datetime import datetime
 
 RAW_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'raw')
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
@@ -18,9 +21,11 @@ class DataFrameBuilder:
 
     def __init__(self, base_file_path=RAW_DATA_PATH):
         self.base_file_path = base_file_path
-        self.features = ['game_id', 'season', 'date', 'home_team', 'away_team', 'game_time', 'period', 'period_time', 'team', 'shooter', 'goalie',
-                         'is_goal', 'shot_type', 'x_coordinate', 'y_coordinate', 'is_empty_net',
-                         'strength', 'is_playoff',  'home_goal', 'away_goal']
+        self.features = ['game_id', 'season', 'date', 'home_team', 'away_team', 'game_time', 'period', 'period_time',
+                         'team', 'shooter', 'goalie', 'is_goal', 'shot_type', 'x_coordinate', 'y_coordinate',
+                         'is_empty_net', 'strength', 'is_playoff', 'home_goal', 'away_goal', 'game_time(s)',
+                         'prev_event_type', 'prev_event_x', 'prev_event_y', 'time_since_prev_event',
+                         'is_rebound', 'distance_to_prev_event', 'speed_since_prev_event']
 
     def read_json_file(self, file_path) -> dict:
         """
@@ -37,7 +42,8 @@ class DataFrameBuilder:
         :return: list of dict
         """
         json_files = glob.glob(os.path.join(self.base_file_path, '*.json'))
-        return [self.read_json_file(file) for file in tqdm(json_files, total=len(json_files), desc="Reading JSON files")]
+        return [self.read_json_file(file) for file in
+                tqdm(json_files, total=len(json_files), desc="Reading JSON files")]
 
     def parse_game_data(self, json_data) -> list:
         """
@@ -54,7 +60,7 @@ class DataFrameBuilder:
                 'allPlays' not in json_data['liveData']['plays']:
             return [None] * len(self.features)
 
-        for event in json_data['liveData']['plays']['allPlays']:
+        for event_id, event in enumerate(json_data['liveData']['plays']['allPlays']):
             # Only interested in goals and shots
             if event['result']['event'] not in ('Goal', 'Shot'):
                 continue
@@ -87,6 +93,40 @@ class DataFrameBuilder:
             event_dict['away_team'] = json_data['gameData']['teams']['away']['name']
             event_dict['home_goal'] = event['about']['goals']['home']
             event_dict['away_goal'] = event['about']['goals']['away']
+
+            # Milestone 2 features below
+            prev_event = json_data['liveData']['plays']['allPlays'][event_id - 1]
+
+            event_dict['game_time(s)'] = int(event_dict['game_time'].split(':')[0]) * 60 + \
+                                         int(event_dict['game_time'].split(':')[1])
+
+            event_dict['prev_event_type'] = prev_event['result']['event']
+            event_dict['prev_event_x'] = prev_event['coordinates']['x'] if 'x' in prev_event['coordinates'] else None
+            event_dict['prev_event_y'] = prev_event['coordinates']['y'] if 'y' in prev_event['coordinates'] else None
+            prev_event_period = int(prev_event['about']['period'])
+            prev_event_period_time = prev_event['about']['periodTime'].split(':')
+            game_time_prev_event = (prev_event_period - 1) * 20 * 60 + int(prev_event_period_time[0]) * 60 + \
+                                   int(prev_event_period_time[1])
+            event_dict['time_since_prev_event'] = event_dict['game_time(s)'] - game_time_prev_event
+            event_dict['is_rebound'] = True if event_dict['prev_event_type'] == 'Shot' else False
+
+            # distance_to_prev_event feature
+            if event_dict['x_coordinate'] is not None and \
+            event_dict['y_coordinate'] is not None and \
+            event_dict['prev_event_x'] is not None and \
+            event_dict['prev_event_y'] is not None:
+                event_dict['distance_to_prev_event'] = np.linalg.norm(np.array([event_dict['x_coordinate'],
+                                                                                event_dict['y_coordinate']]) -
+                                                                      np.array([event_dict['prev_event_x'],
+                                                                                event_dict['prev_event_y']]))
+            else:
+                event_dict['distance_to_prev_event'] = None
+
+            # speed since prev event feature
+            if event_dict['distance_to_prev_event'] and event_dict['time_since_prev_event']:
+                event_dict['speed_since_prev_event'] = (event_dict['distance_to_prev_event'] / event_dict['time_since_prev_event'])
+            else:
+                event_dict['speed_since_prev_event'] = None
             assert (len(event_dict) == len(self.features))
             game_data.append(event_dict.copy())
             event_dict.clear()
@@ -108,18 +148,23 @@ class DataFrameBuilder:
 
         # Make dataframe
         result = pd.DataFrame(result, columns=self.features)
-        print('Append Engineered Features and save csv...')
         # Append engineered features
+        print('Append home offensive side feature... ')
         result = add_home_offensive_side_feature(result)
+        print('Append shot distance feature...')
         result = add_shot_distance_feature(result)
+        print('Append shot angle feature...')
+        result = add_shot_angle(result)
+        print('Append change in shot angle distance feature...')
+        result = add_change_in_shot_angle(result)
         return result
 
 
 def main():
     df_builder = DataFrameBuilder()
     result = df_builder.make_dataframe()
+    print('Save CSV...')
     result.to_csv(os.path.join(DATA_DIR, 'tidy_data.csv'), index=False)
-
 
 if __name__ == "__main__":
     main()
