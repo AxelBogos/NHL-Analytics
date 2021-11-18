@@ -7,7 +7,7 @@ the JSON files.
 """
 
 
-def add_home_offensive_side_feature(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
+def add_offensive_side_feature(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
     """
     Function to create the column determining on which side of the rink the home team is currently attacking.
     -1 if the net the home team scores into is in the negative x-coordinates, +1 if they score in the net
@@ -24,7 +24,11 @@ def add_home_offensive_side_feature(df: pd.DataFrame, inplace: bool = False) -> 
     coordinates = coordinates.groupby(['game_id', 'home_team', 'period'])['x_coordinate'].mean().reset_index()
     coordinates['home_offensive_side'] = np.sign(coordinates['x_coordinate'])
     coordinates = coordinates.drop(['x_coordinate'], axis=1)
-    return pd.merge(df, coordinates, on=['game_id', 'home_team', 'period'], how='left')
+    result = pd.merge(df, coordinates, on=['game_id', 'home_team', 'period'], how='left')
+    result['offensive_side'] = result['home_offensive_side']
+    result.loc[result['team'] != result['home_team'], 'offensive_side'] = -1 * result.loc[result['team'] != result['home_team'], 'offensive_side']
+    result = result.drop(columns=['home_offensive_side'])
+    return result
 
 
 def add_shot_distance_feature(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
@@ -35,24 +39,19 @@ def add_shot_distance_feature(df: pd.DataFrame, inplace: bool = False) -> pd.Dat
     :return: A dataframe with the aforementioned column
     """
 
-    def compute_net_distance(x, y, team, home_team, home_offensive_side):
+    def compute_net_distance(x, y, offensive_side):
         """
         Helper function. Computes and returns the distance between the xy shooter coordinates
         and the net they are scoring into based on "home_offensive_side".
         :param x: shooter x-coordinate
         :param y: shooter y-coordinate
-        :param team: shooter's team
-        :param home_team: Game home team
-        :param home_offensive_side: side of the rink the home team is offensive toward in that period.
+        :param offensive_side: side of the rink the team is offensive toward in that period.
         :return: distance between the shooter and the net he shoots towards.
         """
         goal_coord = np.array([89, 0])
         if x is None or y is None:
             return None
-        if team == home_team:
-            goal_coord = home_offensive_side * goal_coord
-        else:
-            goal_coord = -1 * home_offensive_side * goal_coord
+        goal_coord = offensive_side * goal_coord
         return np.linalg.norm(np.array([x, y]) - goal_coord)
 
     if not inplace:
@@ -60,9 +59,7 @@ def add_shot_distance_feature(df: pd.DataFrame, inplace: bool = False) -> pd.Dat
     df['shot_distance'] = df.apply(lambda row: compute_net_distance(
         row['x_coordinate'],
         row['y_coordinate'],
-        row['team'],
-        row['home_team'],
-        row['home_offensive_side']), axis=1)
+        row['offensive_side']), axis=1)
     return df
 
 
@@ -74,24 +71,19 @@ def add_shot_angle(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
     :return: A dataframe with the aforementioned column
     """
 
-    def single_shot_angle(x: float, y: float, team: str, home_team: str, home_offensive_side: int) -> float:
+    def single_shot_angle(x: float, y: float, offensive_side: int) -> float:
         """
         Helper function. Computes and returns the angle between the xy shooter coordinates
         and the net they are scoring into based on "home_offensive_side" relative to the center line of the net.
         :param x: shooter x-coordinate
         :param y: shooter y-coordinate
-        :param team: shooter's team
-        :param home_team: Game home team
-        :param home_offensive_side: side of the rink the home team is offensive toward in that period.
+        :param offensive_side: side of the rink the team is offensive toward in that period.
         :return: angle between the front of the goal and the shot
         """
         goal_coord = np.array([89, 0])
         if x is None or y is None:
             return 0
-        if team == home_team:
-            goal_coord = home_offensive_side * goal_coord
-        else:
-            goal_coord = -1 * home_offensive_side * goal_coord
+        goal_coord = offensive_side * goal_coord
 
         relative_x = x - goal_coord[0]  # bring x-coordinate relative to the goal
         angle = 0  # Defaults to 0 if x = [-89 or 89]. That's actually common.
@@ -113,10 +105,7 @@ def add_shot_angle(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
     df['shot_angle'] = df.apply(lambda row: single_shot_angle(
         row['x_coordinate'],
         row['y_coordinate'],
-        row['team'],
-        row['home_team'],
-        row['home_offensive_side']), axis=1)
-
+        row['offensive_side']), axis=1)
     return df
 
 
