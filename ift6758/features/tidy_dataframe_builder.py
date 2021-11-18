@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from tqdm import tqdm
 import numpy as np
-from feature_engineering import add_shot_distance_feature, add_home_offensive_side_feature, add_shot_angle,\
+from feature_engineering import add_shot_distance_feature, add_offensive_side_feature, add_shot_angle,\
     add_change_in_shot_angle
 from datetime import datetime
 
@@ -25,7 +25,7 @@ class DataFrameBuilder:
                          'team', 'shooter', 'goalie', 'is_goal', 'shot_type', 'x_coordinate', 'y_coordinate',
                          'is_empty_net', 'strength', 'is_playoff', 'home_goal', 'away_goal', 'game_time(s)',
                          'prev_event_type', 'prev_event_x', 'prev_event_y', 'time_since_prev_event',
-                         'is_rebound', 'distance_to_prev_event', 'speed_since_prev_event']
+                         'is_rebound', 'distance_to_prev_event', 'speed_since_prev_event', 'is_penalty_shot']
 
     def read_json_file(self, file_path) -> dict:
         """
@@ -108,7 +108,8 @@ class DataFrameBuilder:
             game_time_prev_event = (prev_event_period - 1) * 20 * 60 + int(prev_event_period_time[0]) * 60 + \
                                    int(prev_event_period_time[1])
             event_dict['time_since_prev_event'] = event_dict['game_time(s)'] - game_time_prev_event
-            event_dict['is_rebound'] = True if event_dict['prev_event_type'] == 'Shot' else False
+            event_dict['is_rebound'] = True if event_dict['prev_event_type'] == 'Shot' and \
+                                               prev_event['team']['name'] == event_dict['team'] else False
 
             # distance_to_prev_event feature
             if event_dict['x_coordinate'] is not None and \
@@ -127,6 +128,13 @@ class DataFrameBuilder:
                 event_dict['speed_since_prev_event'] = (event_dict['distance_to_prev_event'] / event_dict['time_since_prev_event'])
             else:
                 event_dict['speed_since_prev_event'] = None
+
+            if prev_event['result']['event'] == 'Penalty' and prev_event['result']['penaltySeverity'] == 'Penalty Shot':
+                event_dict['is_penalty_shot'] = True
+            elif not event_dict['is_playoff'] and event_dict['period'] == 5:
+                event_dict['is_penalty_shot'] = True
+            else:
+                event_dict['is_penalty_shot'] = False
             assert (len(event_dict) == len(self.features))
             game_data.append(event_dict.copy())
             event_dict.clear()
@@ -150,7 +158,7 @@ class DataFrameBuilder:
         result = pd.DataFrame(result, columns=self.features)
         # Append engineered features
         print('Append home offensive side feature... ')
-        result = add_home_offensive_side_feature(result)
+        result = add_offensive_side_feature(result)
         print('Append shot distance feature...')
         result = add_shot_distance_feature(result)
         print('Append shot angle feature...')
