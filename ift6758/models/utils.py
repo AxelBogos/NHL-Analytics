@@ -1,6 +1,7 @@
 import os.path
 import pandas as pd
 from typing import List
+import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 TIDY_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'tidy_data.csv')
@@ -11,7 +12,8 @@ DEFAULT_TEST_SEASONS = ['20202021']
 
 def load_data(features: List[str], train_val_seasons: List[str] = None, test_season: List[str] = None,
               train_val_ratio: float = 0.2, target: str = 'is_goal', use_standard_scaler: bool = True,
-              return_as_dataframes: bool = True, drop_all_na: bool = True) -> tuple:
+              return_as_dataframes: bool = True, drop_all_na: bool = True, convert_bool_to_int = True,
+              ) -> tuple:
     """
     Loads the dataset, drops all but the desired features and target var and returns the train_val_test split.
     :param features: List of features to be used as strings. Ex: ['shot_distance']
@@ -51,9 +53,14 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
 
     if use_standard_scaler:
         scaler = StandardScaler()
-        X_train = scaler.fit_transform(X_train)
-        X_val = scaler.transform(X_val)
-        X_test = scaler.transform(X_test)
+        X_train[X_train.select_dtypes(include=[np.number]).columns.values] = scaler.fit_transform(X_train[X_train.select_dtypes(include=[np.number]).columns.values])
+        X_val[X_val.select_dtypes(include=[np.number]).columns.values] = scaler.transform(X_val[X_val.select_dtypes(include=[np.number]).columns.values])
+        X_test[X_test.select_dtypes(include=[np.number]).columns.values] = scaler.transform(X_test[X_test.select_dtypes(include=[np.number]).columns.values])
+
+    if convert_bool_to_int:
+        X_train[X_train.select_dtypes(include=[bool]).columns.values] = X_train[X_train.select_dtypes(include=[bool]).columns.values].astype(int)
+        X_val[X_val.select_dtypes(include=[bool]).columns.values] = X_val[X_val.select_dtypes(include=[bool]).columns.values].astype(int)
+        X_test[X_test.select_dtypes(include=[bool]).columns.values] = X_test[X_test.select_dtypes(include=[bool]).columns.values].astype(int)
 
     if return_as_dataframes:
         X_train, y_train = pd.DataFrame(data=X_train, columns=features), pd.Series(y_train, name=target)

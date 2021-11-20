@@ -86,8 +86,8 @@ class DataFrameBuilder:
             event_dict['shot_type'] = event['result']['secondaryType'] if 'secondaryType' in event['result'] else None
             event_dict['x_coordinate'] = event['coordinates']['x'] if 'x' in event['coordinates'] else None
             event_dict['y_coordinate'] = event['coordinates']['y'] if 'y' in event['coordinates'] else None
-            event_dict['is_empty_net'] = event['result']['emptyNet'] if 'emptyNet' in event['result'] else None
-            event_dict['strength'] = event['result']['strength']['name'] if 'strength' in event['result'] else None
+            event_dict['is_empty_net'] = event['result']['emptyNet'] if 'emptyNet' in event['result'] else 'UNKNOWN'
+            event_dict['strength'] = event['result']['strength']['name'] if 'strength' in event['result'] else 'UNKNOWN'
             event_dict['is_playoff'] = json_data['gameData']['game']['type'] == "P"
             event_dict['home_team'] = json_data['gameData']['teams']['home']['name']
             event_dict['away_team'] = json_data['gameData']['teams']['away']['name']
