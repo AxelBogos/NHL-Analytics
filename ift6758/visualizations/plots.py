@@ -256,6 +256,50 @@ class HockeyPlotter:
             fig.savefig(os.path.join(SAVE_FIG_PATH, 'milestone2', "Q2-3-empty_net_goal_dist.png"))
         return fig
 
+    
+    def milestone2_shot_dist_by_is_goal(self, df: pd.DataFrame, save_fig=True):
+        fig = plt.figure(figsize=(10, 10))
+
+        ax = sns.histplot(data=df, x="shot_distance", hue="is_goal", multiple ="stack", bins=20)
+        #ax.yaxis.grid(color='gray', linestyle='dashed')
+        plt.xlabel('Shot distance (ft)')
+        plt.title('Histogram of shot distance for shots (goals and no-goals separated)')
+        ax.legend(['Goal','No Goal'], title = "Shot Result")
+        
+        plt.show()
+        if save_fig:
+            fig.savefig(os.path.join(SAVE_FIG_PATH, 'milestone2', "Q2-1-shot_dist_by_is_goal.png"))
+        
+        return fig
+    
+    def milestone2_shot_angle_by_is_goal(self, df: pd.DataFrame, save_fig=True):
+        fig = plt.figure(figsize=(10, 10))
+
+        ax = sns.histplot(data=df, x="shot_distance", hue="is_goal", multiple ="stack", bins=20)
+        #ax.yaxis.grid(color='gray', linestyle='dashed')
+        plt.xlabel('Shot distance (ft)')
+        plt.title('Histogram of shot distance for shots (goals and no-goals separated)')
+        ax.legend(['Goal','No Goal'], title = "Shot Result")
+        
+        plt.show()
+        if save_fig:
+            fig.savefig(os.path.join(SAVE_FIG_PATH, 'milestone2', "Q2-1-shot_angle_by_is_goal.png"))        
+        return fig
+    
+    def milestone2_2Dhist_shot_angle_distance(self, df: pd.DataFrame, save_fig=True):
+        
+        fig = plt.figure(figsize=(20, 20))
+
+        ax = sns.jointplot(data=df, x="shot_distance", y="shot_angle", kind="hist", ratio=4)
+        ax.fig.suptitle('2D Histogram of shots by angle and distance from net')
+        ax.fig.tight_layout()
+        ax.ax_joint.set_xlabel("Shot Distance (feet)")
+        ax.ax_joint.set_ylabel("Shot Angle (Degree)")
+               
+        plt.show()
+        if save_fig:
+            ax.savefig(os.path.join(SAVE_FIG_PATH, 'milestone2', "Q2-1-2Dhist_shot_angle_distance.png"))  
+        return fig    
 
 def main():
     df = pd.read_csv(TIDY_DATA_PATH)
@@ -273,6 +317,9 @@ def main():
     # ---- Milestone 2 Plots ----
 
     # Plot Q2.1
+    hockey_plotter.milestone2_shot_dist_by_is_goal(df)
+    hockey_plotter.milestone2_shot_angle_by_is_goal(df)
+    hockey_plotter.milestone2_2Dhist_shot_angle_distance(df)
     
     # Plot Q2.2
     hockey_plotter.milestone2_goal_rate_vs_distance_and_angle(df)
