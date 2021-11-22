@@ -249,10 +249,7 @@ class DataFrameBuilder:
                      
             
             
-            if event['result']['event'] == 'Penalty' and (event["result"]["penaltySeverity"] in ['Minor', 'Bench Minor','Major'] )and (event['result']['secondaryType'] != 'Fighting'):
-                    
-                    if event["result"]["penaltySeverity"] not in self.penalty_types:
-                        self.penalty_types.append(event["result"]["penaltySeverity"])
+            if event['result']['event'] == 'Penalty' and (event["result"]["penaltySeverity"] in ['Minor', 'Bench Minor','Major'] )and (event['result']['secondaryType'] != 'Fighting'):                    
                         
                     event_dict['period'] = event['about']['period']
                     event_dict['period_time'] = event['about']['periodTime']
