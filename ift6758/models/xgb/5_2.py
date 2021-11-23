@@ -1,7 +1,6 @@
 from comet_ml import Experiment
-import os
 
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
@@ -16,96 +15,52 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 import pickle
+
+# import figure plot
 from create_figure import *
 
+# import utils
+import sys
+utils_path = os.path.abspath(os.path.join('..'))
+sys.path.append(utils_path)
+from utils import *
+import os
+from dotenv import load_dotenv
+load_dotenv()
+COMET_API_KEY = os.getenv('COMET_API_KEY') 
 
-def feature_preprocessing(url):
+def xgb_grid_search(X_train, X_val, y_train, y_val, samp_per):
     '''
-    preprocessing dataframe
-    replace NaN value to 0
-    encode feature
-    convert dataframe to training data
-    '''
-    df = pd.read_csv(url)
-    df_train = df.loc[(df['season'] != 20202021) & (df['season'] != 20192020)]
-    
-    df_feature = df_train[['period','shot_type','x_coordinate','y_coordinate','is_empty_net',
-                           'game_time(s)','prev_event_type','prev_event_x','prev_event_y',
-                           'time_since_prev_event','is_rebound','distance_to_prev_event',
-                           'speed_since_prev_event','shot_distance','shot_angle',
-                           'change_in_angle','is_goal']]
-    
-    
-    # file NaN
-    df_feature = df_feature.fillna(0)
-    
-    # Feature encoding for True, False
-    df_feature = df_feature.replace({True: 1, False: 0})
-    
-    # Feature encoding for 'shot_type'
-    df_feature = df_feature.replace({'shot_type':{
-                                       'Backhand'   : 1,
-                                       'Deflected'  : 2,
-                                       'Slap Shot'  : 3,
-                                       'Snap Shot'  : 4,
-                                       'Tip-In'     : 5,
-                                       'Wrap-around': 6,
-                                       'Wrist Shot' : 7
-                                    }
-                                   }
-                                  )
-    
-    # Feature encoding for 'prev_event_type'
-    df_feature = df_feature.replace({'prev_event_type':{
-                                      'Blocked Shot'      : 1 ,
-                                      'Faceoff'           : 2 ,
-                                      'Game End'          : 3 ,
-                                      'Game Official'     : 4 ,
-                                      'Giveaway'          : 5 ,
-                                      'Goal'              : 6 ,
-                                      'Hit'               : 7 ,
-                                      'Missed Shot'       : 8 ,
-                                      'Official Challenge': 9 ,
-                                      'Penalty'           : 10,
-                                      'Period End'        : 11,
-                                      'Period Ready'      : 12,
-                                      'Period Start'      : 13,
-                                      'Shootout Complete' : 14,
-                                      'Shot'              : 15,
-                                      'Stoppage'          : 16,
-                                      'Takeaway'          : 17
-                                     }
-                                    }
-                                   )
-    
-    # convert to model data
-    database = df_feature.to_numpy()
-    
-    X = database[:,0:-1]
-    y = database[:,-1].astype(np.int32)
-    
-    return X, y
+    Grid search for the best hyper parameter
+    because database too large, random sampling x% of train, val for searching param
+        0.1: random sampling 10% of train, val
+        1  : do not sampling database
+    ''' 
+    rng = np.random.default_rng()
+    # random sampling
+    if samp_per < 1:
+        sample_train = rng.choice(X_train.shape[0], size = round(X_train.shape[0]*samp_per), replace=False)
+        sample_val   = rng.choice(X_val.shape[0], size = round(X_val.shape[0]*samp_per), replace=False)
+        
+        X_train = X_train[sample_train, :]
+        y_train = y_train[sample_train]
+        X_val = X_val[sample_val, :]
+        y_val = y_val[sample_val]
 
-def xgb_grid_search(X, y):
-
-    X_train, X_test, y_train, y_test = train_test_split(
-                                         X, y, test_size=0.2, random_state=1)
-    xgb = XGBClassifier(learning_rate=0.02, n_estimators=600, objective='binary:logistic', eval_metric = 'error',
-                        nthread=1)
+    
+    xgb = XGBClassifier(objective='binary:logistic', eval_metric = 'error')
     
     params = {
             'min_child_weight': [1],
             'gamma': [0.5],
             'subsample': [0.7],
-            'learning_rate': [0.01, 0.1],
-            'colsample_bytree': [0.8],
-            'max_depth': [5],
-            'n_estimators': [1000],
+            'learning_rate': [0.01, 0.1, 0.2],
+            'colsample_bytree': [0.4, 0.6, 0.8],
+            'max_depth': [4, 5, 6],
+            'n_estimators': [400, 700, 1000],
             'reg_alpha': [1.3],
             'reg_lambda': [1.1]
             }
-    
-    scoring = {"AUC": "roc_auc", "Accuracy": make_scorer(accuracy_score)}
     
     grid_search = GridSearchCV(
         estimator=xgb,
@@ -118,20 +73,38 @@ def xgb_grid_search(X, y):
     
     model = grid_search.fit(X_train, y_train)
 
-    predict = model.predict(X_test)
+    predict = model.predict(X_val)
+    accuracy = accuracy_score(y_val, predict)
     print('Best AUC Score: {}'.format(model.best_score_))
-    print('Accuracy: {}'.format(accuracy_score(y_test, predict)))
+    print('Accuracy: {}'.format(accuracy))
     
     print(model.best_params_)
     
 
-    return model
+    return model, accuracy
 
 def main():
-    url = '../../data/tidy_data.csv'
-    X, y  = feature_preprocessing(url)
-
-    model = xgb_grid_search(X, y)
+    '''
+    grid search for the best model
+    save figures for the best parameter
+    save model, hyperparameter
+    '''
+    feature = ['period','x_coordinate','y_coordinate','is_empty_net',
+                'game_time(s)','prev_event_x','prev_event_y',
+                'time_since_prev_event','is_rebound','distance_to_prev_event',
+                'speed_since_prev_event','shot_distance','shot_angle',
+                'change_in_angle','shot_type','prev_event_type']
+    df_X, df_y = feature_preprocessing(feature)
+    
+    X = df_X.to_numpy()
+    y = (df_y.to_numpy()).astype(int)
+    
+    # split Train, valid
+    X_train, X_val, y_train, y_val = train_test_split(
+                                         X, y, test_size=0.2, random_state=1)
+    
+    
+    model, accuracy = xgb_grid_search(X_train, X_val, y_train, y_val, 1)
     
     xgb_model = XGBClassifier(
         colsample_bytree =  model.best_params_['colsample_bytree'],
@@ -145,13 +118,19 @@ def main():
         subsample        =  model.best_params_['subsample'],
         use_label_encoder=  False,
         objective        =  'binary:logistic',
-        eval_metric      = 'error'
+        eval_metric      =  'error'
     )
     
-    # create 4 figures
-    y = y.reshape(-1,1)
-    fig_name = '../../../figures/5_2_grid_search'
-    xgboost_basic_feature(X, y, xgb_model, fig_name)
+    xgb_model.fit(X_train, y_train)
+    
+    y_pred = xgb_model.predict_proba(X_val)[:,1]
+    y_est = [(i>=0.5)*1 for i in y_pred ]
+    
+    fig_name = '5_2_grid_search'
+    fig_roc_auc(y_val, y_pred, fig_name)
+    fig_cumulative_goal(y_val, y_pred, fig_name)
+    fig_goal_rate(y_val, y_pred, fig_name)
+    calibration_fig(y_val, y_pred, fig_name)
     
     # save xgb_model
     file_name = "xgb_model.pkl"
@@ -160,21 +139,15 @@ def main():
     
     # load
     model_loaded = pickle.load(open(file_name, "rb"))
-    
-    scores_mean = np.mean(cross_val_score(model_loaded, X, y, cv=5))
-    
-    print('score of grid search best model = ', scores_mean)
-    
-    os.environ["COMET_API_KEY"] = "Jt0FZk0zwp83uLiydjGVENsFg"
-    
+
     experiment = Experiment(
-        api_key=os.environ.get("COMET_API_KEY"),
-        project_name="quickstart-project",
-        workspace="axelbogos",
+        api_key=COMET_API_KEY,
+        project_name="ift-6758-milestone-2",
+        workspace="vanbinhtruong",
     )
-    
+    experiment.log_parameters(xgb_model.get_params())
+    experiment.log_metric("accuracy", accuracy)
     experiment.log_model('5_2 grid search model', 'xgb_model.pkl')
 
 if __name__ == "__main__":
     main()
-

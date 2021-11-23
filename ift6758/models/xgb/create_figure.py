@@ -13,13 +13,15 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.calibration import CalibrationDisplay
 
-def fig_roc_auc(y_test, y_pred, fig_name) -> None:
+FIGURE_PATH = os.path.join(os.path.dirname(__file__), '..','..','..', 'figures')
+
+def fig_roc_auc(y_val, y_pred, fig_name) -> None:
     '''
-    y_test: testing label
+    y_val: testing label
     y_pred: probability of estimate x_test
     '''
     # plot ROC & AUC
-    fpr, tpr, _ = roc_curve(y_test, y_pred)
+    fpr, tpr, _ = roc_curve(y_val, y_pred)
     roc_auc = auc(fpr, tpr)
     
     #plt.figure()
@@ -37,19 +39,20 @@ def fig_roc_auc(y_test, y_pred, fig_name) -> None:
     plt.title("Receiver operating characteristic example")
     plt.legend(loc="lower right")
     
-    plt.savefig(fig_name + '_roc_auc.png')
+    fig_name = fig_name + '_roc_auc.png'
+    plt.savefig(os.path.join(FIGURE_PATH, fig_name))
     plt.close()
     return None
 
 # plot GOAL RATE
-def fig_cumulative_goal(y_test, y_pred, fig_name) -> None:
+def fig_cumulative_goal(y_val, y_pred, fig_name) -> None:
     '''
-    y_test: testing label
+    y_val: testing label
     y_pred: probability of estimate x_test
     use ecdfplot in seaborn for estimate y_pred probability
     '''
     y_pred_percentile = 100*stats.rankdata(y_pred, "min")/len(y_pred)
-    test_est = np.array([np.round(y_pred_percentile), y_test]).T
+    test_est = np.array([np.round(y_pred_percentile), y_val]).T
     df_test_est = pd.DataFrame(test_est, columns = ['model_per', 'is_goal'])
     
     df_fil = df_test_est[df_test_est['is_goal'] == 1]
@@ -67,21 +70,24 @@ def fig_cumulative_goal(y_test, y_pred, fig_name) -> None:
     ax.set_yticklabels(['{:,.0%}'.format(y) for y in yvals])
     ax.set(xlabel='Shot probability model percentile')
     ax.set_title("Cumulative % of Goals")
-    plt.savefig(fig_name + '_cumulative_goal.png')
+    
+    fig_name = fig_name + '_cumulative_goal.png'
+    plt.savefig(os.path.join(FIGURE_PATH, fig_name))
+
 
     plt.close()
     return None
 
-def fig_goal_rate(y_test, y_pred, fig_name) -> None:
+def fig_goal_rate(y_val, y_pred, fig_name) -> None:
     '''
     create goal rate figure
-    y_test: testing label
+    y_val: testing label
     y_pred: probability of estimate x_test
     count number of goal, goal+shot
     change xlable, ylabel of the figure
     '''
     # plot GOAL RATE
-    test_est = np.array([np.round(y_pred*100), y_test]).T
+    test_est = np.array([np.round(y_pred*100), y_val]).T
     df_test_est = pd.DataFrame(test_est)
     
     g = df_test_est.groupby(0)
@@ -126,56 +132,23 @@ def fig_goal_rate(y_test, y_pred, fig_name) -> None:
     
     ax.set_xticklabels(100 - xvals.astype(np.int32))
     ax.set_title("Goal Rate")
-    plt.savefig(fig_name + '_goal_rate.png')
-    #plt.pause(3)
+    
+    fig_name = fig_name + '_goal_rate.png'
+    plt.savefig(os.path.join(FIGURE_PATH, fig_name))
+
     plt.close()
     return None
-
-def xgboost_basic_feature(X, y, model, fig_name) -> None:
+    
+def calibration_fig(y_val, y_pred, fig_name) -> None:
     '''
-    create 4 curve figures from X, y database
+    create calibration curve figures from y_val, y_pred database
     '''
 
-    
-    X_train, X_test, y_train, y_test = train_test_split(
-                                         X, y, test_size=0.2, random_state=1)
-    
-
-    model.fit(X_train, y_train)
-    
-    y_pred = model.predict_proba(X_test)[:,1]
-    y_est = [(i>=0.5)*1 for i in y_pred ]
-    
-    # figures with shot_distance feature
-    fig_roc_auc(y_test[:,0], y_pred, fig_name)
-    fig_goal_rate(y_test[:,0], y_pred, fig_name)
-    fig_cumulative_goal(y_test[:,0], y_pred, fig_name)
-    
     plt.figure()
-    disp = CalibrationDisplay.from_predictions(y_test, y_pred)
-    
-    plt.savefig(fig_name + '_calibration.png')
-    #plt.show()
-    #plt.pause(3)
+    disp = CalibrationDisplay.from_predictions(y_val, y_pred)
+
+    fig_name = fig_name + '_calibration.png'
+    plt.savefig(os.path.join(FIGURE_PATH, fig_name))
+
     plt.close()
     return None
-
-
-def get_database(url, feature, target) -> None:
-    '''
-    training with some feature and target taken from url file
-    generated figures is save on the same working part
-    rrl = './database/tidy_data.csv'
-    features = ['shot_distance', 'shot_angle']
-    target = ['is_goal']
-    '''
-    df = pd.read_csv(url)
-    df_train = df.loc[(df['season'] != 20202021) & (df['season'] != 20192020)]
-    
-    database_x = df_train[feature].to_numpy()
-    database_y = df_train[target].to_numpy()
-    
-    X = database_x
-    y = database_y.astype(np.int32)
-
-    return X, y
