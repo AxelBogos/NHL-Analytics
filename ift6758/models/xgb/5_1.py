@@ -46,7 +46,7 @@ def xgb_basic_figure(model, feature, fig_name):
     fig_roc_auc(y_val, y_pred, fig_name)
     fig_cumulative_goal(y_val, y_pred, fig_name)
     fig_goal_rate(y_val, y_pred, fig_name)
-    
+    calibration_fig(y_val, y_pred, fig_name)
     return None
 
 def main():
