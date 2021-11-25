@@ -26,6 +26,9 @@ class DataFrameBuilder:
                          'is_empty_net', 'strength', 'is_playoff', 'home_goal', 'away_goal', 'game_time(s)',
                          'prev_event_type', 'prev_event_x', 'prev_event_y', 'time_since_prev_event',
                          'is_rebound', 'distance_to_prev_event', 'speed_since_prev_event', 'is_penalty_shot']
+        self.penalty_features = ['game_id', "game_time","home_strength","away_strength","homepenaltystart",
+                                 "awaypenaltystart"]
+
 
     def read_json_file(self, file_path) -> dict:
         """
