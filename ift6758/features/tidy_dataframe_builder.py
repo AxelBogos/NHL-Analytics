@@ -445,6 +445,7 @@ class DataFrameBuilder:
 
 def main():
     df_builder = DataFrameBuilder()
+    result = df_builder.make_dataframe()
     df = df_builder.make_dataframe()
     df_pen = df_builder.make_penalty_dataframe()
     
