@@ -50,10 +50,10 @@ def main():
 	# Random Baseline
 	y_pred_vec.append(np.random.uniform(0, 1, size=y_val.shape[0]))
 
-	#fig_roc_auc(y_val, y_pred_vec)
-	fig_cumulative_goal(y_val, y_pred_vec)
-	# fig_goal_rate(y_val, y_pred_vec)
-	# calibration_fig(y_val, y_pred_vec)
+	fig_roc_auc(y_val, y_pred_vec, '5-1')
+	fig_cumulative_goal(y_val, y_pred_vec, '5-1')
+	fig_goal_rate(y_val, y_pred_vec, '5-1')
+	calibration_fig(y_val, y_pred_vec, '5-1')
 
 
 if __name__ == "__main__":
