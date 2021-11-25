@@ -89,7 +89,7 @@ def main():
     save figures for the best parameter
     save model, hyperparameter
     '''
-    feature = ['period','x_coordinate','y_coordinate','is_empty_net',
+    feature = ['period','x_coordinate','y_coordinate',
                 'game_time(s)','prev_event_x','prev_event_y',
                 'time_since_prev_event','is_rebound','distance_to_prev_event',
                 'speed_since_prev_event','shot_distance','shot_angle',

@@ -135,7 +135,7 @@ def main():
         forward search
     save result of feature selection to comet
     '''
-    feature = ['period','x_coordinate','y_coordinate','is_empty_net',
+    feature = ['period','x_coordinate','y_coordinate',
                 'game_time(s)','prev_event_x','prev_event_y',
                 'time_since_prev_event','is_rebound','distance_to_prev_event',
                 'speed_since_prev_event','shot_distance','shot_angle',
@@ -148,9 +148,9 @@ def main():
             gamma            =  0.5,
             subsample        =  0.7,
             learning_rate    =  0.01,
-            colsample_bytree =  0.6,
-            max_depth        =  5,
-            n_estimators     =  700,
+            colsample_bytree =  0.8,
+            max_depth        =  6,
+            n_estimators     =  1000,
             reg_alpha        =  1.3,
             reg_lambda       =  1.1,
             objective        =  'binary:logistic',
