@@ -252,8 +252,9 @@ class DataFrameBuilder:
                      
             
             
-            if event['result']['event'] == 'Penalty' and (event["result"]["penaltySeverity"] in ['Minor', 'Bench Minor','Major'] )and (event['result']['secondaryType'] != 'Fighting'):                    
-                        
+            if event['result']['event'] == 'Penalty' and (event["result"]["penaltySeverity"] in ['Minor', 'Bench Minor','Major'] )and (event['result']['secondaryType'] != 'Fighting'):
+                    
+                    
                     event_dict['period'] = event['about']['period']
                     event_dict['period_time'] = event['about']['periodTime']
                     
@@ -293,6 +294,7 @@ class DataFrameBuilder:
 
         
         return game_data
+
     def parse_game_data(self, json_data) -> list:
         """
         Parses the required data from 1 json file (i.e. 1 game).
@@ -401,7 +403,20 @@ class DataFrameBuilder:
             if game_data == [None] * len(self.features):  # empty row
                 continue
             result.extend([i for i in game_data])  # quicker than just extend
-            
+
+        # Make dataframe
+        result = pd.DataFrame(result, columns=self.features)
+        # Append engineered features
+        print('Append home offensive side feature... ')
+        result = add_offensive_side_feature(result)
+        print('Append shot distance feature...')
+        result = add_shot_distance_feature(result)
+        print('Append shot angle feature...')
+        result = add_shot_angle(result)
+        print('Append change in shot angle distance feature...')
+        result = add_change_in_shot_angle(result)
+        return result
+    
     def make_penalty_dataframe(self) -> pd.DataFrame:
         """
         This function builds the complete data frame by reading all jsons and storing them in a list,
@@ -427,21 +442,6 @@ class DataFrameBuilder:
         #result.to_csv(os.path.join(DATA_DIR, 'tidy_data_pen.csv'), index=False)
     
         return result2
-            
-            
-        # Make dataframe
-        result = pd.DataFrame(result, columns=self.features)
-        # Append engineered features
-        print('Append home offensive side feature... ')
-        result = add_offensive_side_feature(result)
-        print('Append shot distance feature...')
-        result = add_shot_distance_feature(result)
-        print('Append shot angle feature...')
-        result = add_shot_angle(result)
-        print('Append change in shot angle distance feature...')
-        result = add_change_in_shot_angle(result)
-        return result
-
 
 def main():
     df_builder = DataFrameBuilder()
@@ -473,7 +473,7 @@ def main():
     
     print('Save CSV...')
     
-    df_merged.to_csv(os.path.join(DATA_DIR, 'tidy_data.csv'), index=False)
-
+    df_merged.to_csv(os.path.join(DATA_DIR, 'tidy_data_pen.csv'), index=False)
+    
 if __name__ == "__main__":
     main()
