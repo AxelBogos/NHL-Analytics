@@ -124,14 +124,14 @@ def main():
     xgb_model.fit(X_train, y_train)
     
     y_pred = xgb_model.predict_proba(X_val)[:,1]
-    y_est = [(i>=0.5)*1 for i in y_pred ]
     
-    fig_name = '5_2_grid_search'
-    fig_roc_auc(y_val, y_pred, fig_name)
-    fig_cumulative_goal(y_val, y_pred, fig_name)
-    fig_goal_rate(y_val, y_pred, fig_name)
-    calibration_fig(y_val, y_pred, fig_name)
-    
+    y_val_vec = [y_val]
+    y_pred_vec = [y_pred]
+    fig_name = ['5_2_xgb_gs']
+    fig_roc_auc(y_val_vec, y_pred_vec, fig_name)
+    fig_cumulative_goal(y_val_vec, y_pred_vec, fig_name)
+    fig_goal_rate(y_val_vec, y_pred_vec, fig_name)
+    calibration_fig(y_val_vec, y_pred_vec, fig_name)
     # save xgb_model
     file_name = "xgb_model.pkl"
     # save
