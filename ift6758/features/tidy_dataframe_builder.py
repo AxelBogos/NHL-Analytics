@@ -473,7 +473,7 @@ def main():
     
     print('Save CSV...')
     
-    df_merged.to_csv(os.path.join(DATA_DIR, 'tidy_data_pen.csv'), index=False)
+    df_merged.to_csv(os.path.join(DATA_DIR, 'tidy_data.csv'), index=False)
     
 if __name__ == "__main__":
     main()
