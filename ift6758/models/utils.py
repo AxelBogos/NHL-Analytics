@@ -31,7 +31,9 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
     train = df[df['season'].astype(str).isin(train_val_seasons)]
     test = df[df['season'].astype(str).isin(test_season)]
 
-    X_train, y_train = train.drop(train.columns.difference(features), axis=1), train[target]
-    X_test, y_test = test.drop(test.columns.difference(features), axis=1), test[target]
+    features.append(target)
 
-    return X_train, y_train, X_test, y_test
+    train = train.drop(train.columns.difference(features), axis=1)
+    test = test.drop(test.columns.difference(features), axis=1)
+
+    return train, test
