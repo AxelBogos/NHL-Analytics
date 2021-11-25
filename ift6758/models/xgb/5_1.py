@@ -1,16 +1,11 @@
-
-# import figure plot
-from create_figure import *
-
-# import utils
 import sys
-
+from dotenv import load_dotenv
+from xgboost import XGBClassifier
+from create_figure import *
 utils_path = os.path.abspath(os.path.join('..'))
 sys.path.append(utils_path)
+# from utils import *
 from ift6758.models.utils import *
-import os
-from dotenv import load_dotenv
-import numpy as np
 load_dotenv()
 COMET_API_KEY = os.getenv('COMET_API_KEY')
 

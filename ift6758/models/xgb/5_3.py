@@ -1,29 +1,15 @@
-from comet_ml import Experiment
-import os
+# import utils
+import sys
 
-from sklearn.model_selection import GridSearchCV
-from xgboost import XGBClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import accuracy_score
-
-from sklearn import feature_extraction 
-from sklearn.metrics import roc_curve, auc, precision_recall_curve
-from sklearn.feature_selection import VarianceThreshold
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import shap
+from comet_ml import Experiment
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import VarianceThreshold
+from sklearn.feature_selection import chi2
 
 # import figure plot
 from create_figure import *
 
-# import utils
-import sys
 utils_path = os.path.abspath(os.path.join('..'))
 sys.path.append(utils_path)
 from utils import *

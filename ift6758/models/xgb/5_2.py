@@ -1,29 +1,21 @@
-from comet_ml import Experiment
-
-from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
-from xgboost import XGBClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import accuracy_score
-
-from sklearn.metrics import roc_curve, auc, precision_recall_curve
-from sklearn.metrics import make_scorer
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 import pickle
+# import utils
+import sys
+
+from comet_ml import Experiment
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import make_scorer
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import train_test_split
+from xgboost import XGBClassifier
 
 # import figure plot
 from create_figure import *
 
-# import utils
-import sys
 utils_path = os.path.abspath(os.path.join('..'))
 sys.path.append(utils_path)
-from utils import *
+# from utils import *
+from ift6758.models.utils import *
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -94,14 +86,23 @@ def main():
                 'time_since_prev_event','is_rebound','distance_to_prev_event',
                 'speed_since_prev_event','shot_distance','shot_angle',
                 'change_in_angle','shot_type','prev_event_type']
-    df_X, df_y = feature_preprocessing(feature)
-    
-    X = df_X.to_numpy()
-    y = (df_y.to_numpy()).astype(int)
-    
-    # split Train, valid
-    X_train, X_val, y_train, y_val = train_test_split(
-                                         X, y, test_size=0.2, random_state=1)
+
+    X_train, y_train, X_val, y_val, X_test, y_test = load_data(
+        features=feature,
+        train_val_seasons=DEFAULT_TRAIN_SEASONS,
+        test_season=DEFAULT_TEST_SEASONS,
+        do_split_val=False,
+        target='is_goal',
+        use_standard_scaler=True,
+        drop_all_na=False,
+        convert_bool_to_int=True,
+        one_hot_encode_categoricals=True
+    )
+
+    # fill NaN (as mention in section 2 NaN = 0)
+    X_train = X_train.fillna(0)
+    X_val = X_val.fillna(0)
+    X_test = X_test.fillna(0)
     
     
     model, accuracy = xgb_grid_search(X_train, X_val, y_train, y_val, 1)

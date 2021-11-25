@@ -1,16 +1,12 @@
 import os
 
-from xgboost import XGBClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import accuracy_score
-from scipy import stats
-from sklearn.metrics import roc_curve, auc, precision_recall_curve
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
+from scipy import stats
 from sklearn.calibration import CalibrationDisplay
+from sklearn.metrics import roc_curve, auc
 
 FIGURE_PATH = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'figures', 'milestone2', 'Q5')
 MODELS = ['Distance', 'Angle', 'Distance + Angle', 'Random']
@@ -63,8 +59,6 @@ def fig_cumulative_goal(y_val, y_pred_vec, fig_number) -> None:
         cumulative_data = cumulative_goal_data(y_val, y_pred)
         ax = sns.ecdfplot(data=cumulative_data, x=100 - cumulative_data.model_per, label=MODELS[idx])
 
-    yvals = ax.get_yticks()
-    # plt.yticks(np.arange(min(yvals), max(yvals)*1.05, 0.1))
     plt.yticks(np.arange(0, 1.05, 0.1))
     plt.xticks(np.arange(0, 100 * 1.01, 10))
     xvals = ax.get_xticks()
