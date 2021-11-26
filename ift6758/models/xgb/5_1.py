@@ -28,9 +28,8 @@ def main():
 		test_season=DEFAULT_TEST_SEASONS,
 		train_val_ratio=0.2,
 		target='is_goal',
-		use_standard_scaler=True,
-		return_as_dataframes=True,
-		drop_all_na=False
+		use_standard_scaler=False,
+		drop_all_na=True
 	)
 	y_pred_vec = []
 	FEATURES_LIST = [['shot_distance'], ['shot_angle'], ['shot_distance', 'shot_angle']]

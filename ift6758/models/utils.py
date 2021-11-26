@@ -52,8 +52,11 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
     # drop all NAN rows
     if drop_all_na:
         train = train.dropna(subset=features)
+        train = train.reset_index()
         val = val.dropna(subset=features)
+        val = val.reset_index()
         test = test.dropna(subset=features)
+        test = test.reset_index()
 
     # Split X, y
     X_train, y_train = train.drop(train.columns.difference(features), axis=1), train[target]
