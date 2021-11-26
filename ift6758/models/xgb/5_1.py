@@ -10,7 +10,7 @@ COMET_API_KEY = os.getenv('COMET_API_KEY')
 
 
 def train_basic_xgb(X_train, y_train, X_val):
-	model = XGBClassifier(use_label_encoder=False, eval_metric='error')
+	model = XGBClassifier()
 	model.fit(X_train, y_train)
 	y_pred = model.predict_proba(X_val)[:, 1]
 	return y_pred
