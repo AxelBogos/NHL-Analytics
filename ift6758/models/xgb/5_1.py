@@ -1,9 +1,8 @@
-import sys
 from dotenv import load_dotenv
 from xgboost import XGBClassifier
 from create_figure import *
-utils_path = os.path.abspath(os.path.join('..'))
-sys.path.append(utils_path)
+# utils_path = os.path.abspath(os.path.join('..'))
+# sys.path.append(utils_path)
 # from utils import *
 from ift6758.models.utils import *
 load_dotenv()
@@ -43,11 +42,12 @@ def main():
 
 	# Random Baseline
 	y_pred_vec.append(np.random.uniform(0, 1, size=y_val.shape[0]))
-
-	fig_roc_auc(y_val, y_pred_vec, '5-1')
-	fig_cumulative_goal(y_val, y_pred_vec, '5-1')
-	fig_goal_rate(y_val, y_pred_vec, '5-1')
-	calibration_fig(y_val, y_pred_vec, '5-1')
+	model_names = ['Distance', 'Angle', 'Distance + Angle', 'Random']
+	fig_number = '5-1'
+	fig_roc_auc(y_val, y_pred_vec, fig_number, model_names)
+	fig_cumulative_goal(y_val, y_pred_vec, fig_number, model_names)
+	fig_goal_rate(y_val, y_pred_vec, fig_number, model_names)
+	calibration_fig(y_val, y_pred_vec, fig_number, model_names)
 
 
 if __name__ == "__main__":

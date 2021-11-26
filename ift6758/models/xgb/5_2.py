@@ -1,28 +1,26 @@
-# import utils
-import sys
-
+from comet_ml import Experiment
 import optuna
 import xgboost as xgb
 from optuna.integration import XGBoostPruningCallback
-from sklearn.metrics import accuracy_score, roc_auc_score
+from sklearn.metrics import accuracy_score, roc_auc_score, f1_score, precision_score, recall_score,log_loss
 from sklearn.metrics import make_scorer
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedKFold
 from xgboost import XGBClassifier
 from pprint import pprint
+import pickle
 
 # import figure plot
 from create_figure import *
 
-utils_path = os.path.abspath(os.path.join('..'))
-sys.path.append(utils_path)
+# utils_path = os.path.abspath(os.path.join('..'))
+# sys.path.append(utils_path)
 # from utils import *
 from ift6758.models.utils import *
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
-COMET_API_KEY = os.getenv('COMET_API_KEY')
 
 feature = ['period', 'x_coordinate', 'y_coordinate',
            'game_time(s)', 'prev_event_x', 'prev_event_y',
@@ -39,18 +37,19 @@ def objective(trial):
         do_split_val=False,
         target='is_goal',
         use_standard_scaler=True,
-        drop_all_na=False,
+        drop_all_na=True,
         convert_bool_to_int=True,
         one_hot_encode_categoricals=True
     )
-    X.fillna(0)
-    # dropping NAN removes about ~ 4% of the data and reduces dimensionality by 6, I think its a worthwhile trade-off.
+    #X.fillna(0)
+
 
     param_grid = {
         "silent": 1,
         "objective": "binary:logistic",
         "eval_metric": "auc",
         "booster": trial.suggest_categorical("booster", ["gbtree", "gblinear", "dart"]),
+        "scale_pos_weight": trial.suggest_categorical("scale_pos_weight", [1, 25, 50, 75, 99, 1000]),
         "lambda": trial.suggest_loguniform("lambda", 1e-8, 1.0),
         "alpha": trial.suggest_loguniform("alpha", 1e-8, 1.0),
     }
@@ -76,8 +75,7 @@ def objective(trial):
         clf = xgb.train(param_grid, train, evals=[(val, "validation")],
                         callbacks=[XGBoostPruningCallback(trial, "validation-auc")])
         y_preds = clf.predict(val)
-        pred_labels = np.rint(y_preds)
-        score = roc_auc_score(y[val_idx], pred_labels)
+        score = roc_auc_score(y[val_idx], y_preds)
         cv_scores[idx] = score
     return np.mean(cv_scores)
 
@@ -143,7 +141,7 @@ def main():
     '''
     study = optuna.create_study(direction="maximize", study_name="XGB Classifier")
     func = lambda trial: objective(trial)
-    study.optimize(func, n_trials=100)
+    study.optimize(func, n_trials=20)
     print(f"\tBest params:")
 
     pprint(study.best_params)
@@ -159,100 +157,51 @@ def main():
         convert_bool_to_int=True,
         one_hot_encode_categoricals=True
     )
-    model = XGBClassifier(objective='binary:logistic', **params)
-
+    # Train Model with optimal params
+    experiment = Experiment(
+        api_key=os.getenv('COMET_API_KEY'),
+        project_name="ift-6758-milestone-2",
+        workspace="axelbogos",
+    )
+    # model = XGBClassifier(objective='binary:logistic', **params)
+    X_train = X_train.drop(columns=X_train.columns.difference(X_test.columns))
+    X_test = X_test.drop(columns=X_test.columns.difference(X_train.columns))
+    model = XGBClassifier()
     model.fit(X_train, y_train)
 
     y_pred = model.predict_proba(X_test)[:, 1]
 
-    y_val_vec = [y_test]
     y_pred_vec = [y_pred]
-    fig_name = ['5_2_xgb_gs']
-    fig_roc_auc(y_val_vec, y_pred_vec, '5-2')
-    fig_cumulative_goal(y_val_vec, y_pred_vec, '5-2')
-    fig_goal_rate(y_val_vec, y_pred_vec, '5-2')
-    calibration_fig(y_val_vec, y_pred_vec, '5-2')
-    # # save xgb_model
-    # file_name = "xgb_model.pkl"
-    # # save
-    # pickle.dump(model, open(file_name, "wb"))
-    #
-    # # load
-    # model_loaded = pickle.load(open(file_name, "rb"))
-    #
-    # experiment = Experiment(
-    #     api_key=COMET_API_KEY,
-    #     project_name="ift-6758-milestone-2",
-    #     workspace="vanbinhtruong",
-    # )
-    # experiment.log_parameters(xgb_model.get_params())
-    # experiment.log_metric("accuracy", accuracy)
-    # experiment.log_model('5_2 grid search model', 'xgb_model.pkl')
+    model_names=['Tuned XGB']
+    fig_number = '5-2'
+    fig_roc_auc(y_test, y_pred_vec, fig_number, model_names)
+    fig_cumulative_goal(y_test, y_pred_vec, fig_number, model_names)
+    fig_goal_rate(y_test, y_pred_vec, fig_number, model_names)
+    calibration_fig(y_test, y_pred_vec, fig_number, model_names)
 
+    # save xgb_model
+    file_name = "tuned_xgb_model.pkl"
 
+    # save
+    pickle.dump(model, open(file_name, "wb"))
 
-    # -- Van's code below ----
-    # X_train, y_train, X_val, y_val, X_test, y_test = load_data(
-    #     features=feature,
-    #     train_val_seasons=DEFAULT_TRAIN_SEASONS,
-    #     test_season=DEFAULT_TEST_SEASONS,
-    #     do_split_val=False,
-    #     target='is_goal',
-    #     use_standard_scaler=True,
-    #     drop_all_na=False,
-    #     convert_bool_to_int=True,
-    #     one_hot_encode_categoricals=True
-    # )
-    #
-    # # fill NaN (as mention in section 2 NaN = 0)
-    # X_train = X_train.fillna(0)
-    # X_val = X_val.fillna(0)
-    # X_test = X_test.fillna(0)
-    #
-    # model, accuracy = xgb_grid_search(X_train, X_val, y_train, y_val, 1)
-    #
-    # xgb_model = XGBClassifier(
-    #     colsample_bytree=model.best_params_['colsample_bytree'],
-    #     gamma=model.best_params_['gamma'],
-    #     learning_rate=model.best_params_['learning_rate'],
-    #     max_depth=model.best_params_['max_depth'],
-    #     min_child_weight=model.best_params_['min_child_weight'],
-    #     n_estimators=model.best_params_['n_estimators'],
-    #     reg_alpha=model.best_params_['reg_alpha'],
-    #     reg_lambda=model.best_params_['reg_lambda'],
-    #     subsample=model.best_params_['subsample'],
-    #     use_label_encoder=False,
-    #     objective='binary:logistic',
-    #     eval_metric='error'
-    # )
-    #
-    # xgb_model.fit(X_train, y_train)
-    #
-    # y_pred = xgb_model.predict_proba(X_val)[:, 1]
-    #
-    # y_val_vec = [y_val]
-    # y_pred_vec = [y_pred]
-    # fig_name = ['5_2_xgb_gs']
-    # fig_roc_auc(y_val_vec, y_pred_vec, fig_name)
-    # fig_cumulative_goal(y_val_vec, y_pred_vec, fig_name)
-    # fig_goal_rate(y_val_vec, y_pred_vec, fig_name)
-    # calibration_fig(y_val_vec, y_pred_vec, fig_name)
-    # # save xgb_model
-    # file_name = "xgb_model.pkl"
-    # # save
-    # pickle.dump(model, open(file_name, "wb"))
-    #
-    # # load
-    # model_loaded = pickle.load(open(file_name, "rb"))
-    #
-    # experiment = Experiment(
-    #     api_key=COMET_API_KEY,
-    #     project_name="ift-6758-milestone-2",
-    #     workspace="vanbinhtruong",
-    # )
-    # experiment.log_parameters(xgb_model.get_params())
-    # experiment.log_metric("accuracy", accuracy)
-    # experiment.log_model('5_2 grid search model', 'xgb_model.pkl')
+    # Compute metrics
+    y_pred_labels = model.predict(X_test)
+    f1 = f1_score(y_test, y_pred_labels)
+    accuracy = accuracy_score(y_test, y_pred_labels)
+    precision = precision_score(y_test, y_pred_labels)
+    recall = recall_score(y_test, y_pred_labels)
+    metrics = {"accuracy": accuracy, "f1": f1, "recall": recall, "precision": precision}
+    params = {
+        "model_type": 'XGB',
+        "scaler": "standard scaler",
+        "param_grid": str(model.get_params()),
+    }
+
+    experiment.log_parameters(params)
+    experiment.log_metrics(metrics)
+    experiment.add_tag('5-2 XGB')
+    experiment.log_model('5_2 tuned model', 'tuned_xgb_model.pkl')
 
 
 if __name__ == "__main__":

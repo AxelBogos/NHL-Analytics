@@ -13,7 +13,7 @@ DEFAULT_TEST_SEASONS = ['20202021']
 
 def load_data(features: List[str], train_val_seasons: List[str] = None, test_season: List[str] = None,
               train_val_ratio: float = 0.2, target: str = 'is_goal', use_standard_scaler: bool = True,
-              return_as_numpy: bool = False, drop_all_na: bool = True, do_split_val: bool = True,
+              return_as_numpy: bool = False, drop_all_na: bool = False, do_split_val: bool = True,
               convert_bool_to_int=True, one_hot_encode_categoricals = False) -> tuple:
     """
     Loads the dataset, drops all but the desired features and target var and returns the train_val_test split.

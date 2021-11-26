@@ -1,18 +1,18 @@
-# import utils
-import sys
-
 import shap
 from comet_ml import Experiment
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.feature_selection import chi2
-
+from xgboost import XGBClassifier
 # import figure plot
+from sklearn.model_selection import cross_val_score
+
 from create_figure import *
 
-utils_path = os.path.abspath(os.path.join('..'))
-sys.path.append(utils_path)
-from utils import *
+# utils_path = os.path.abspath(os.path.join('..'))
+# sys.path.append(utils_path)
+# from utils import *
+from ift6758.models.utils import *
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -127,7 +127,7 @@ def main():
                 'speed_since_prev_event','shot_distance','shot_angle',
                 'change_in_angle','shot_type','prev_event_type']
     
-    df_X, df_y = feature_preprocessing(feature)
+    df_X, df_y = load_data(feature,do_split_val=False,one_hot_encode_categoricals=True)
     
     xgb_model = XGBClassifier(
             min_child_weight =  1,

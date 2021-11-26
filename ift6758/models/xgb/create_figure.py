@@ -9,22 +9,21 @@ from sklearn.calibration import CalibrationDisplay
 from sklearn.metrics import roc_curve, auc
 
 FIGURE_PATH = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'figures', 'milestone2', 'Q5')
-MODELS = ['Distance', 'Angle', 'Distance + Angle', 'Random']
 
 
-def fig_roc_auc(y_val, y_pred_vec, fig_number) -> None:
+def fig_roc_auc(y_val, y_pred_vec, fig_number,model_names) -> None:
     fig = plt.figure(figsize=(10, 10))
     for idx, y_pred in enumerate(y_pred_vec):
         # Get FPR, TPR and AUC
         fpr, tpr, _ = roc_curve(y_val, y_pred)
         roc_auc = auc(fpr, tpr)
-        plt.plot(fpr, tpr, label=f"ROC ({MODELS[idx]}): area = {roc_auc:.3f})")
+        plt.plot(fpr, tpr, label=f"ROC ({model_names[idx]}): area = {roc_auc:.3f})")
     plt.plot([0, 1], [0, 1], color="navy", linestyle="--")
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
     plt.xlabel("False Positive Rate")
     plt.ylabel("True Positive Rate")
-    plt.title(f"{fig_number} ROC Curves of Various Feature Selection")
+    plt.title(f"{fig_number} ROC Curves")
     plt.legend(loc="lower right")
     fig_name = f'{fig_number}_roc_auc.png'
     plt.grid(color='gray', linestyle='--', linewidth=0.5)
@@ -48,7 +47,7 @@ def cumulative_goal_data(y_test, y_pred):
     return df_fil
 
 
-def fig_cumulative_goal(y_val, y_pred_vec, fig_number) -> None:
+def fig_cumulative_goal(y_val, y_pred_vec, fig_number,model_names) -> None:
     '''
     y_val: testing label
     y_pred: probability of estimate x_test
@@ -57,7 +56,7 @@ def fig_cumulative_goal(y_val, y_pred_vec, fig_number) -> None:
     fig = plt.figure(figsize=(10, 10))
     for idx, y_pred in enumerate(y_pred_vec):
         cumulative_data = cumulative_goal_data(y_val, y_pred)
-        ax = sns.ecdfplot(data=cumulative_data, x=100 - cumulative_data.model_per, label=MODELS[idx])
+        ax = sns.ecdfplot(data=cumulative_data, x=100 - cumulative_data.model_per, label=model_names[idx])
 
     plt.yticks(np.arange(0, 1.05, 0.1))
     plt.xticks(np.arange(0, 100 * 1.01, 10))
@@ -76,7 +75,7 @@ def fig_cumulative_goal(y_val, y_pred_vec, fig_number) -> None:
     plt.close()
 
 
-def fig_goal_rate(y_val, y_pred_vec, fig_number) -> None:
+def fig_goal_rate(y_val, y_pred_vec, fig_number,model_names) -> None:
     '''
     create goal rate figure
     y_val: testing label
@@ -111,7 +110,7 @@ def fig_goal_rate(y_val, y_pred_vec, fig_number) -> None:
 
         xval = 100 - df_test_est.model_per
 
-        ax = sns.lineplot(x=xval, y=df_test_est.goal_per, label=MODELS[idx])
+        ax = sns.lineplot(x=xval, y=df_test_est.goal_per, label=model_names[idx])
 
     plt.yticks(np.arange(0, 1.05, 0.1))
     plt.xticks(np.arange(0, 100 * 1.01, 10))
@@ -136,13 +135,13 @@ def fig_goal_rate(y_val, y_pred_vec, fig_number) -> None:
     return None
 
 
-def calibration_fig(y_val, y_pred_vec, fig_number) -> None:
+def calibration_fig(y_val, y_pred_vec, fig_number,model_names) -> None:
     '''
     create calibration curve figures from y_val, y_pred database
     '''
     fig, ax = plt.subplots(figsize=(10, 10))
     for idx, y_pred in enumerate(y_pred_vec):
-        disp = CalibrationDisplay.from_predictions(y_val, y_pred, n_bins=10, label=MODELS[idx], ax=ax)
+        disp = CalibrationDisplay.from_predictions(y_val, y_pred, n_bins=10, label=model_names[idx], ax=ax)
 
     plt.grid(color='gray', linestyle='--', linewidth=0.5)
     fig_name = f'{fig_number}_calibration.png'
