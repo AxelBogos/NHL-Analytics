@@ -469,7 +469,15 @@ def main():
     temp1 = [df_merged["away_team"] == df_merged['team']]* df_merged['time_since_home_pp'].to_numpy()
     temp2 = [df_merged["home_team"] == df_merged['team']]* df_merged['time_since_away_pp'].to_numpy()
     df_merged['time_since_pp'] = temp1.T + temp2.T
-    df_merged = df_merged.drop(["homepenaltystart","awaypenaltystart","time_since_away_pp","time_since_home_pp", "game_time_second"], axis = 1)
+    df_merged = df_merged.drop(["homepenaltystart","awaypenaltystart","time_since_away_pp","time_since_home_pp"], axis = 1)
+    
+    
+    #adding information relative to strength for each team based on penalty info
+    df_merged["strength"] = (df_merged.home_strength.to_numpy() * [df_merged.home_team==df_merged.team] + df_merged.away_strength.to_numpy() * [df_merged.away_team == df_merged.team]).T
+    df_merged["relative_strength"] = ([df_merged.team == df_merged.home_team] * (df_merged.strength - df_merged.away_strength).to_numpy() + [df_merged.team == df_merged.away_team] * (df_merged.strength - df_merged.home_strength).to_numpy()).T
+    
+    #correctly fill empty_net column, empty = False
+    df_merged['is_empty_net'] = df_merged['is_empty_net'].fillna(False)
     
     print('Save CSV...')
     

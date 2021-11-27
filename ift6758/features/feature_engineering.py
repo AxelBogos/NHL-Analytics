@@ -20,14 +20,11 @@ def add_offensive_side_feature(df: pd.DataFrame, inplace: bool = False) -> pd.Da
         df = df.copy()
     if 'home_offensive_side' in df.columns:
         return df
-    coordinates = df[df['team'] == df['home_team']]
-    coordinates = coordinates.groupby(['game_id', 'home_team', 'period'])['x_coordinate'].mean().reset_index()
-    coordinates['home_offensive_side'] = np.sign(coordinates['x_coordinate'])
+    coordinates = df
+    coordinates = coordinates.groupby(['game_id', 'team', 'period'])['x_coordinate'].mean().reset_index()
+    coordinates['offensive_side'] = np.sign(coordinates['x_coordinate'])
     coordinates = coordinates.drop(['x_coordinate'], axis=1)
-    result = pd.merge(df, coordinates, on=['game_id', 'home_team', 'period'], how='left')
-    result['offensive_side'] = result['home_offensive_side']
-    result.loc[result['team'] != result['home_team'], 'offensive_side'] = -1 * result.loc[result['team'] != result['home_team'], 'offensive_side']
-    result = result.drop(columns=['home_offensive_side'])
+    result = pd.merge(df, coordinates, on=['game_id', 'team', 'period'], how='left')
     return result
 
 
