@@ -52,10 +52,11 @@ def objective(trial):
         "scale_pos_weight": trial.suggest_categorical("scale_pos_weight", [1, 25, 50, 75, 99, 1000]),
         "lambda": trial.suggest_loguniform("lambda", 1e-8, 1.0),
         "alpha": trial.suggest_loguniform("alpha", 1e-8, 1.0),
+        "n_estimators": trial.suggest_int("n_estimators", 100, 5000)
     }
 
     if param_grid["booster"] == "gbtree" or param_grid["booster"] == "dart":
-        param_grid["max_depth"] = trial.suggest_int("max_depth", 1, 9)
+        param_grid["max_depth"] = trial.suggest_int("max_depth", 1, 12)
         param_grid["eta"] = trial.suggest_loguniform("eta", 1e-8, 1.0)
         param_grid["gamma"] = trial.suggest_loguniform("gamma", 1e-8, 1.0)
         param_grid["grow_policy"] = trial.suggest_categorical("grow_policy", ["depthwise", "lossguide"])
@@ -141,7 +142,7 @@ def main():
     '''
     study = optuna.create_study(direction="maximize", study_name="XGB Classifier")
     func = lambda trial: objective(trial)
-    study.optimize(func, n_trials=20)
+    study.optimize(func, n_trials=50)
     print(f"\tBest params:")
 
     pprint(study.best_params)
@@ -163,10 +164,9 @@ def main():
         project_name="ift-6758-milestone-2",
         workspace="axelbogos",
     )
-    # model = XGBClassifier(objective='binary:logistic', **params)
+    model = XGBClassifier(objective='binary:logistic', **params)
     X_train = X_train.drop(columns=X_train.columns.difference(X_test.columns))
     X_test = X_test.drop(columns=X_test.columns.difference(X_train.columns))
-    model = XGBClassifier()
     model.fit(X_train, y_train)
 
     y_pred = model.predict_proba(X_test)[:, 1]

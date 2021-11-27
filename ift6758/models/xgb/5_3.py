@@ -127,8 +127,13 @@ def main():
                 'speed_since_prev_event','shot_distance','shot_angle',
                 'change_in_angle','shot_type','prev_event_type']
     
-    df_X, df_y = load_data(feature,do_split_val=False,one_hot_encode_categoricals=True)
-    
+    df_X, df_y,_,_ = load_data(feature, do_split_val=False, one_hot_encode_categoricals=True)
+    params = {'objective': 'binary:logistic', 'use_label_encoder': True, 'base_score': 0.5, 'booster': 'gbtree',
+     'colsample_bylevel': 1, 'colsample_bynode': 1, 'colsample_bytree': 1, 'gamma': 0, 'gpu_id': -1,
+     'importance_type': 'gain', 'interaction_constraints': '', 'learning_rate': 0.300000012, 'max_delta_step': 0,
+     'max_depth': 6, 'min_child_weight': 1, 'monotone_constraints': '()', 'n_estimators': 100,
+     'n_jobs': 4, 'num_parallel_tree': 1, 'random_state': 0, 'reg_alpha': 0, 'reg_lambda': 1, 'scale_pos_weight': 1,
+     'subsample': 1, 'tree_method': 'exact', 'validate_parameters': 1, 'verbosity': None}
     xgb_model = XGBClassifier(
             min_child_weight =  1,
             gamma            =  0.5,
@@ -150,12 +155,12 @@ def main():
     y = df_y.to_numpy()
     shap_feature(X, y, xgb_model)
     
-    experiment = Experiment(
-        api_key=COMET_API_KEY,
-        project_name="ift-6758-milestone-2",
-        workspace="vanbinhtruong",
-    )
-    experiment.log_metrics(result)
+    # experiment = Experiment(
+    #     api_key=COMET_API_KEY,
+    #     project_name="ift-6758-milestone-2",
+    #     workspace="vanbinhtruong",
+    # )
+    # experiment.log_metrics(result)
     
     print('result is = ',result)
 if __name__ == "__main__":
