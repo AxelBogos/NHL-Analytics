@@ -10,8 +10,8 @@ from cometconf import *
 from sklearn.calibration import CalibrationDisplay
 
 
-def plot_Confusion_matrix(y_test, y_prediction, score, fig_name):
-     cm = metrics.confusion_matrix(y_test, y_prediction)
+def plot_Confusion_matrix(y_valid, y_prediction, score, fig_name):
+     cm = metrics.confusion_matrix(y_valid, y_prediction)
      plt.figure(figsize=(9, 9))
      sns.heatmap(cm, annot=True, fmt=".3f", linewidths=.5, square=True, cmap='Blues_r');
      plt.ylabel('Actual label')
@@ -24,7 +24,7 @@ def plot_Confusion_matrix(y_test, y_prediction, score, fig_name):
 
 def plot_roc_curve(roc_data, fig_name):
      for i in roc_data:
-          plt.plot(i[0], i[1], label="AUC-" + i[3] + "=" + str(i[2]))
+          plt.plot(i[0], i[1], label="AUC-" + i[3] + "=" + str(round(i[2],4)))
      plt.ylabel('True Positive Rate')
      plt.xlabel('False Positive Rate')
      plt.legend(loc=4)
@@ -34,24 +34,24 @@ def plot_roc_curve(roc_data, fig_name):
 
 
 # plot GOAL RATE
-def cumulative_goal_data(y_test, y_pred):
+def cumulative_goal_data(y_valid, y_pred):
      '''
-     y_test: testing label
-     y_pred: probability of estimate x_test
+     y_valid: testing label
+     y_pred: probability of estimate x_valid
      use ecdfplot in seaborn for estimate y_pred probability
      '''
      y_pred_percentile = 100 * stats.rankdata(y_pred, "min") / len(y_pred)
-     test_est = np.array([np.round(y_pred_percentile), y_test]).T
-     df_test_est = pd.DataFrame(test_est, columns=['model_per', 'is_goal'])
+     test_est = np.array([np.round(y_pred_percentile), y_valid]).T
+     df_valid_est = pd.DataFrame(test_est, columns=['model_per', 'is_goal'])
 
-     df_fil = df_test_est[df_test_est['is_goal'] == 1]
+     df_fil = df_valid_est[df_valid_est['is_goal'] == 1]
      return df_fil
 
 
 def fig_cumulative_goal(list_cumul_data):
      '''
-     y_test: testing label
-     y_pred: probability of estimate x_test
+     y_valid: testing label
+     y_pred: probability of estimate x_valid
      use ecdfplot in seaborn for estimate y_pred probability
      '''
      plt.figure()
@@ -75,16 +75,16 @@ def fig_cumulative_goal(list_cumul_data):
 
 
 
-def goal_rate_data(y_test, y_pred):
+def goal_rate_data(y_valid, y_pred):
      '''
      create goal rate figure
-     y_test: testing label
-     y_pred: probability of estimate x_test
+     y_valid: testing label
+     y_pred: probability of estimate x_valid
      count number of goal, goal+shot
      change xlable, ylabel of the figure
      '''
      # plot GOAL RATE
-     test_est = np.array([np.round(y_pred * 100), y_test]).T
+     test_est = np.array([np.round(y_pred * 100), y_valid]).T
      df_test_est = pd.DataFrame(test_est)
      g = df_test_est.groupby(0)
      # count goals.
@@ -123,7 +123,7 @@ def fig_goal_rate(list_goal_rate):
 def calibration_plot(list_calibration_data):
     fig, ax = plt.subplots()
     for i in list_calibration_data:
-          CalibrationDisplay.from_estimator(i[2], i[0], i[1], n_bins=20, ax=ax, name=i[3])
+          CalibrationDisplay.from_predictions(i[0], i[1], n_bins=20, ax=ax, name=i[2])
 
     line = mlines.Line2D([0, 1], [0, 1], color='black')
     transform = ax.transAxes
