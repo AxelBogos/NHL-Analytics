@@ -8,7 +8,7 @@ from pprint import pprint
 import pickle
 
 # import figure plot
-from create_figure import *
+from ift6758.models.create_figure import *
 
 from ift6758.models.utils import *
 import os
@@ -23,12 +23,12 @@ feature_list = ['shot_type', 'strength', 'is_playoff', 'prev_event_type', 'time_
 
 def objective(trial, X, y):
     param_grid = {
-        "n_estimators": trial.suggest_int("n_estimators", 100, 2000, step=50),
+        "n_estimators": trial.suggest_int("n_estimators", 100, 2500, step=50),
         "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.5),
-        "num_leaves": trial.suggest_int("num_leaves", 8, 1500, step=20),
+        "num_leaves": trial.suggest_int("num_leaves", 8, 2500, step=20),
         "scale_pos_weight": trial.suggest_int("scale_pos_weight", 1, 11, step=2),
         "max_depth": trial.suggest_int("max_depth", 3, 12),
-        "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 100, 1500, step=100),
+        "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 100, 2500, step=100),
         "lambda_l1": trial.suggest_int("lambda_l1", 0, 100, step=5),
         "lambda_l2": trial.suggest_int("lambda_l2", 0, 100, step=5),
         "min_gain_to_split": trial.suggest_float("min_gain_to_split", 0, 15),
@@ -99,10 +99,10 @@ def main():
     y_pred_vec = [y_pred]
     model_names = ['Tuned LGBM']
     fig_number = '6-LGBM'
-    fig_roc_auc(y_test, y_pred_vec, fig_number, model_names)
-    fig_cumulative_goal(y_test, y_pred_vec, fig_number, model_names)
-    fig_goal_rate(y_test, y_pred_vec, fig_number, model_names)
-    calibration_fig(y_test, y_pred_vec, fig_number, model_names)
+    fig_roc_auc(y_test, y_pred_vec, fig_number, model_names, experiment)
+    fig_cumulative_goal(y_test, y_pred_vec, fig_number, model_names, experiment)
+    fig_goal_rate(y_test, y_pred_vec, fig_number, model_names, experiment)
+    calibration_fig(y_test, y_pred_vec, fig_number, model_names, experiment)
 
     # save xgb_model
     file_name = "6-LGBM.pkl"

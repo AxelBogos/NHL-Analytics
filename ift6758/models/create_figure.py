@@ -1,5 +1,6 @@
 import os
 
+from comet_ml import Experiment
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -8,10 +9,10 @@ from scipy import stats
 from sklearn.calibration import CalibrationDisplay
 from sklearn.metrics import roc_curve, auc
 
-FIGURE_PATH = os.path.join(os.path.dirname(__file__), '..', '..', '..','..', 'figures', 'milestone2', 'Q6')
+FIGURE_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'figures', 'milestone2')
 
 
-def fig_roc_auc(y_val, y_pred_vec, fig_number,model_names) -> None:
+def fig_roc_auc(y_val, y_pred_vec, fig_number,model_names,experiment=None) -> None:
     fig = plt.figure(figsize=(10, 10))
     for idx, y_pred in enumerate(y_pred_vec):
         # Get FPR, TPR and AUC
@@ -27,6 +28,8 @@ def fig_roc_auc(y_val, y_pred_vec, fig_number,model_names) -> None:
     plt.legend(loc="lower right")
     fig_name = f'{fig_number}_roc_auc.png'
     plt.grid(color='gray', linestyle='--', linewidth=0.5)
+    if experiment != None:
+        experiment.log_figure(figure=fig)
     plt.show()
     fig.savefig(os.path.join(FIGURE_PATH, fig_name))
     plt.close()
@@ -47,7 +50,7 @@ def cumulative_goal_data(y_test, y_pred):
     return df_fil
 
 
-def fig_cumulative_goal(y_val, y_pred_vec, fig_number,model_names) -> None:
+def fig_cumulative_goal(y_val, y_pred_vec, fig_number,model_names,experiment=None) -> None:
     '''
     y_val: testing label
     y_pred: probability of estimate x_test
@@ -68,6 +71,8 @@ def fig_cumulative_goal(y_val, y_pred_vec, fig_number,model_names) -> None:
     ax.set_title(f"{fig_number} Cumulative % of Goals")
     plt.legend(loc='lower right')
     plt.grid(color='gray', linestyle='--', linewidth=0.5)
+    if experiment != None:
+        experiment.log_figure(figure=fig)
     plt.show()
     fig_name = f'{fig_number}_cumulative_goals.png'
     fig.savefig(os.path.join(FIGURE_PATH, fig_name))
@@ -75,7 +80,7 @@ def fig_cumulative_goal(y_val, y_pred_vec, fig_number,model_names) -> None:
     plt.close()
 
 
-def fig_goal_rate(y_val, y_pred_vec, fig_number,model_names) -> None:
+def fig_goal_rate(y_val, y_pred_vec, fig_number,model_names,experiment=None) -> None:
     '''
     create goal rate figure
     y_val: testing label
@@ -130,12 +135,14 @@ def fig_goal_rate(y_val, y_pred_vec, fig_number,model_names) -> None:
     plt.grid(color='gray', linestyle='--', linewidth=0.5)
     fig_name = f'{fig_number}_goal_rate.png'
     fig.savefig(os.path.join(FIGURE_PATH, fig_name))
+    if experiment != None:
+        experiment.log_figure(figure=fig)
     plt.show()
     plt.close()
     return None
 
 
-def calibration_fig(y_val, y_pred_vec, fig_number,model_names) -> None:
+def calibration_fig(y_val, y_pred_vec, fig_number,model_names,experiment=None) -> None:
     '''
     create calibration curve figures from y_val, y_pred database
     '''
@@ -144,10 +151,12 @@ def calibration_fig(y_val, y_pred_vec, fig_number,model_names) -> None:
         disp = CalibrationDisplay.from_predictions(y_val, y_pred, n_bins=10, label=model_names[idx], ax=ax)
 
     plt.grid(color='gray', linestyle='--', linewidth=0.5)
-    plt.title(f"{fig_number} Calibration Curves")
     fig_name = f'{fig_number}_calibration.png'
+    plt.title(f"{fig_number} Calibration Curve")
     plt.savefig(os.path.join(FIGURE_PATH, fig_name))
     plt.legend(loc="center right")
+    if experiment != None:
+        experiment.log_figure(figure=fig)
     plt.show()
     plt.close()
     return None
