@@ -1,32 +1,18 @@
-from comet_ml import Experiment
-import os
-
-from sklearn.model_selection import GridSearchCV
-from xgboost import XGBClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import accuracy_score
-
-from sklearn import feature_extraction 
-from sklearn.metrics import roc_curve, auc, precision_recall_curve
-from sklearn.feature_selection import VarianceThreshold
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import shap
-
+from comet_ml import Experiment
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import VarianceThreshold
+from sklearn.feature_selection import chi2
+from xgboost import XGBClassifier
 # import figure plot
+from sklearn.model_selection import cross_val_score
+
 from create_figure import *
 
-# import utils
-import sys
-utils_path = os.path.abspath(os.path.join('..'))
-sys.path.append(utils_path)
-from utils import *
+# utils_path = os.path.abspath(os.path.join('..'))
+# sys.path.append(utils_path)
+# from utils import *
+from ift6758.models.utils import *
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -50,7 +36,7 @@ def feature_selection(df_X, df_y, model):
 
     # Normalization 
     # Zscore and Min-Max normalization
-    cols = ['x_coordinate', 'y_coordinate', 'game_time(s)', 
+    cols = ['x_coordinate', 'y_coordinate', 'game_time(s)',
             'prev_event_x', 'prev_event_y', 'time_since_prev_event',
             'distance_to_prev_event', 'speed_since_prev_event',
             'shot_distance', 'shot_angle', 'change_in_angle']
@@ -135,28 +121,24 @@ def main():
         forward search
     save result of feature selection to comet
     '''
-    feature = ['period','x_coordinate','y_coordinate',
-                'game_time(s)','prev_event_x','prev_event_y',
-                'time_since_prev_event','is_rebound','distance_to_prev_event',
-                'speed_since_prev_event','shot_distance','shot_angle',
-                'change_in_angle','shot_type','prev_event_type']
+    feature = ['period', 'x_coordinate', 'y_coordinate',
+               'game_time(s)', 'prev_event_x', 'prev_event_y',
+               'time_since_prev_event', 'is_rebound', 'distance_to_prev_event',
+               'speed_since_prev_event', 'shot_distance', 'shot_angle',
+               'change_in_angle', 'shot_type', 'prev_event_type', 'time_since_pp',
+               'home_strength', 'away_strength']
     
-    df_X, df_y = feature_preprocessing(feature)
-    
-    xgb_model = XGBClassifier(
-            min_child_weight =  1,
-            gamma            =  0.5,
-            subsample        =  0.7,
-            learning_rate    =  0.01,
-            colsample_bytree =  0.8,
-            max_depth        =  6,
-            n_estimators     =  1000,
-            reg_alpha        =  1.3,
-            reg_lambda       =  1.1,
-            objective        =  'binary:logistic',
-            use_label_encoder = False,
-            eval_metric      =  'error'
-        )
+    df_X, df_y,_,_ = load_data(feature, do_split_val=False, one_hot_encode_categoricals=True)
+    params = {'objective': 'binary:logistic', 'use_label_encoder': True, 'base_score': 0.5, 'booster': 'dart', 'colsample_bylevel': 1,
+              'colsample_bynode': 1, 'colsample_bytree': 1, 'gamma': 1.0644957574704856e-06, 'gpu_id': -1, 'importance_type': 'gain',
+              'interaction_constraints': '', 'learning_rate': 0.253149986, 'max_delta_step': 0, 'max_depth': 8, 'min_child_weight': 1,
+              'monotone_constraints': '()', 'n_estimators': 709, 'n_jobs': 4, 'num_parallel_tree': 1, 'random_state': 0,
+              'reg_alpha': 1.86814141e-05, 'reg_lambda': 1.74496799e-05, 'scale_pos_weight': 4, 'subsample': 1,
+              'tree_method': 'exact','validate_parameters': 1, 'verbosity': None, 'alpha': 1.8681414898850136e-05,
+              'eta': 0.2531499873091687,'grow_policy': 'depthwise', 'lambda': 1.744968010669035e-05,
+              'normalize_type': 'forest', 'rate_drop': 0.047822250564598025,'sample_type': 'uniform',
+              'skip_drop': 0.00026092912897969413}
+    xgb_model = XGBClassifier(**params)
     
     result = feature_selection(df_X, df_y, xgb_model)
     
@@ -167,9 +149,10 @@ def main():
     experiment = Experiment(
         api_key=COMET_API_KEY,
         project_name="ift-6758-milestone-2",
-        workspace="vanbinhtruong",
+        workspace="axelbogos",
     )
     experiment.log_metrics(result)
+    #TODO LOG MODEL & metrics
     
     print('result is = ',result)
 if __name__ == "__main__":
