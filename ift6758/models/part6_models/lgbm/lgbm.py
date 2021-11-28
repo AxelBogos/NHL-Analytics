@@ -23,9 +23,10 @@ feature_list = ['shot_type', 'strength', 'is_playoff', 'prev_event_type', 'time_
 
 def objective(trial, X, y):
     param_grid = {
-        "n_estimators": trial.suggest_int("n_estimators", 100, 5000, step=100),
+        "n_estimators": trial.suggest_int("n_estimators", 100, 1500, step=50),
         "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.3),
         "num_leaves": trial.suggest_int("num_leaves", 8, 3000, step=20),
+        "scale_pos_weight": trial.suggest_int("scale_pos_weight", 1, 11, step=2),
         "max_depth": trial.suggest_int("max_depth", 3, 12),
         "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 100, 5000, step=100),
         "lambda_l1": trial.suggest_int("lambda_l1", 0, 100, step=5),
@@ -48,7 +49,7 @@ def objective(trial, X, y):
             y_train,
             eval_set=[(X_val, y_val)],
             eval_metric="binary_logloss",
-            early_stopping_rounds=100,
+            early_stopping_rounds=25,
             callbacks=[LightGBMPruningCallback(trial, "binary_logloss")],
         )
         preds = model.predict_proba(X_val)
@@ -76,7 +77,7 @@ def main():
     study = optuna.create_study(pruner=optuna.pruners.MedianPruner(n_warmup_steps=5),
                                 direction="minimize", study_name="LGBM Classifier")
     func = lambda trial: objective(trial, X, y)
-    study.optimize(func, n_trials=1)
+    study.optimize(func, n_trials=75)
     print(f"\tBest params:")
 
     pprint(study.best_params)
@@ -104,7 +105,7 @@ def main():
     calibration_fig(y_test, y_pred_vec, fig_number, model_names)
 
     # save xgb_model
-    file_name = "tuned_xgb_model.pkl"
+    file_name = "6-LGBM.pkl"
 
     # save
     pickle.dump(model, open(file_name, "wb"))
@@ -121,6 +122,7 @@ def main():
         "scaler": "standard scaler",
         "param_grid": str(model.get_params()),
     }
+    print(metrics)
 
     experiment.log_parameters(params)
     experiment.log_metrics(metrics)

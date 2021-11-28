@@ -8,7 +8,7 @@ from scipy import stats
 from sklearn.calibration import CalibrationDisplay
 from sklearn.metrics import roc_curve, auc
 
-FIGURE_PATH = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'figures', 'milestone2', 'Q6')
+FIGURE_PATH = os.path.join(os.path.dirname(__file__), '..', '..', '..','..', 'figures', 'milestone2', 'Q6')
 
 
 def fig_roc_auc(y_val, y_pred_vec, fig_number,model_names) -> None:
@@ -144,6 +144,7 @@ def calibration_fig(y_val, y_pred_vec, fig_number,model_names) -> None:
         disp = CalibrationDisplay.from_predictions(y_val, y_pred, n_bins=10, label=model_names[idx], ax=ax)
 
     plt.grid(color='gray', linestyle='--', linewidth=0.5)
+    plt.title(f"{fig_number} Calibration Curves")
     fig_name = f'{fig_number}_calibration.png'
     plt.savefig(os.path.join(FIGURE_PATH, fig_name))
     plt.legend(loc="center right")
