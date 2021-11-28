@@ -7,21 +7,11 @@ from q3_3 import *
 
 
 if __name__ == "__main__":
-    # Create an experiment with your api key
 
     roc_data = []
-    tidy = pd.read_csv("../../data/tidy_data_2.csv", sep=",")
-
-    feature_list = ['is_goal', 'shot_distance', 'shot_angle']
+    tidy = pd.read_csv("../../data/tidy_data.csv", sep=",")
+    feature_list = ['shot_distance']
     X_train, y_train, X_val, y_val, _, _ = utils.load_data(features=feature_list)
-
-    # x_train, x_valid, y_train, y_valid = train_test_split(tidy_features, tidy_target, test_size=0.2, random_state=0)
-
-    #tidy = tidy.loc[:, ("shot_distance", "is_empty_net", "shot_angle", "is_goal")]
-    #tidy["is_empty_net"] = tidy["is_empty_net"].fillna(0)
-    #tidy = tidy.replace({False: 0, True: 1})
-    #tidy = tidy.dropna()
-
     Q1_train_regression_evaluate(X_train, y_train, X_val, y_val)
     model_r, y_valid_r, predictions_r_prob, y_prediction_r = Q2_regression_random(X_train, y_train, X_val, y_val)
     model, y_valid, predictions_prob, y_prediction = Q2_regression_distance(X_train, y_train, X_val, y_val)
@@ -34,7 +24,12 @@ if __name__ == "__main__":
     auc_random = metrics.roc_auc_score(y_valid_r, predictions_r_prob)
     roc_data.append([fpr_r, tpr_r, auc_random, 'random'])
 
+    feature_list = [ 'shot_angle']
+    X_train, y_train, X_val, y_val, _, _ = utils.load_data(features=feature_list)
     model_angle, y_valid_angle, predictions_prob_angle, y_prediction_angle = Q3_regre_angle(X_train, y_train, X_val, y_val)
+
+    feature_list = ['shot_distance', 'shot_angle']
+    X_train, y_train, X_val, y_val, _, _ = utils.load_data(features=feature_list)
     model_angle_dist, y_valid_angle_dist, predictions_prob_angle_dist, y_prediction_angle_dist = Q3_regression_angle_distance(X_train, y_train, X_val, y_val)
 
     fpr_a, tpr_a, _ = metrics.roc_curve(y_valid_angle, predictions_prob_angle[::, 1])
