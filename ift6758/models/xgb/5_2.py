@@ -141,14 +141,14 @@ def main():
     save figures for the best parameter
     save model, hyperparameter
     '''
-    # study = optuna.create_study(pruner=optuna.pruners.MedianPruner(n_warmup_steps=5),
-    #                             direction="maximize", study_name="XGB Classifier")
-    # func = lambda trial: objective(trial)
-    # study.optimize(func, n_trials=50)
-    # print(f"\tBest params:")
-    #
-    # pprint(study.best_params)
-    # params = study.best_params
+    study = optuna.create_study(pruner=optuna.pruners.MedianPruner(n_warmup_steps=5),
+                                direction="maximize", study_name="XGB Classifier")
+    func = lambda trial: objective(trial)
+    study.optimize(func, n_trials=50)
+    print(f"\tBest params:")
+
+    pprint(study.best_params)
+    params = study.best_params
     params= {'alpha': 1.8681414898850136e-05,
      'booster': 'dart',
      'eta': 0.2531499873091687,
