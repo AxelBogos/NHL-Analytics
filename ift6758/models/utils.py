@@ -2,6 +2,7 @@ import os.path
 import pandas as pd
 from typing import List
 from sklearn.preprocessing import StandardScaler
+import numpy as np
 
 TIDY_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'tidy_data.csv')
 # TODO double-check which seasons we should be using. Milestone2 description seems inconsistent with Milestone 1 data.
