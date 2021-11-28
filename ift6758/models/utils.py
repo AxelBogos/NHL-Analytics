@@ -7,8 +7,8 @@ import numpy as np
 
 TIDY_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'tidy_data.csv')
 # TODO double-check which seasons we should be using. Milestone2 description seems inconsistent with Milestone 1 data.
-DEFAULT_TRAIN_SEASONS = ['20162017', '20172018', '20182019', '20192020']
-DEFAULT_TEST_SEASONS = ['20202021']
+DEFAULT_TRAIN_SEASONS = ['20152016','20162017', '20172018', '20182019']
+DEFAULT_TEST_SEASONS = ['20192020']
 
 
 def load_data(features: List[str], train_val_seasons: List[str] = None, test_season: List[str] = None,

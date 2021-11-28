@@ -26,7 +26,8 @@ feature = ['period', 'x_coordinate', 'y_coordinate',
            'game_time(s)', 'prev_event_x', 'prev_event_y',
            'time_since_prev_event', 'is_rebound', 'distance_to_prev_event',
            'speed_since_prev_event', 'shot_distance', 'shot_angle',
-           'change_in_angle', 'shot_type', 'prev_event_type']
+           'change_in_angle', 'shot_type', 'prev_event_type','time_since_pp',
+           'home_strength','away_strength']
 
 
 def objective(trial):
@@ -49,10 +50,10 @@ def objective(trial):
         "objective": "binary:logistic",
         "eval_metric": "auc",
         "booster": trial.suggest_categorical("booster", ["gbtree", "gblinear", "dart"]),
-        "scale_pos_weight": trial.suggest_categorical("scale_pos_weight", [1, 25, 50, 75, 99, 1000]),
+        "scale_pos_weight": trial.suggest_int("scale_pos_weight", 1, 25),
         "lambda": trial.suggest_loguniform("lambda", 1e-8, 1.0),
         "alpha": trial.suggest_loguniform("alpha", 1e-8, 1.0),
-        "n_estimators": trial.suggest_int("n_estimators", 100, 5000)
+        "n_estimators": trial.suggest_int("n_estimators", 100, 1000)
     }
 
     if param_grid["booster"] == "gbtree" or param_grid["booster"] == "dart":
@@ -66,8 +67,8 @@ def objective(trial):
         param_grid["rate_drop"] = trial.suggest_loguniform("rate_drop", 1e-8, 1.0)
         param_grid["skip_drop"] = trial.suggest_loguniform("skip_drop", 1e-8, 1.0)
 
-    cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=0)
-    cv_scores = np.empty(3)
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
+    cv_scores = np.empty(5)
     for idx, (train_idx, val_idx) in enumerate(cv.split(X, y)):
         train = xgb.DMatrix(X.iloc[train_idx], label=y[train_idx])
         val = xgb.DMatrix(X.iloc[val_idx], label=y[val_idx])
@@ -140,13 +141,28 @@ def main():
     save figures for the best parameter
     save model, hyperparameter
     '''
-    study = optuna.create_study(direction="maximize", study_name="XGB Classifier")
-    func = lambda trial: objective(trial)
-    study.optimize(func, n_trials=50)
-    print(f"\tBest params:")
+    # study = optuna.create_study(pruner=optuna.pruners.MedianPruner(n_warmup_steps=5),
+    #                             direction="maximize", study_name="XGB Classifier")
+    # func = lambda trial: objective(trial)
+    # study.optimize(func, n_trials=50)
+    # print(f"\tBest params:")
+    #
+    # pprint(study.best_params)
+    # params = study.best_params
+    params= {'alpha': 1.8681414898850136e-05,
+     'booster': 'dart',
+     'eta': 0.2531499873091687,
+     'gamma': 1.0644957574704856e-06,
+     'grow_policy': 'depthwise',
+     'lambda': 1.744968010669035e-05,
+     'max_depth': 8,
+     'n_estimators': 709,
+     'normalize_type': 'forest',
+     'rate_drop': 0.047822250564598025,
+     'sample_type': 'uniform',
+     'scale_pos_weight': 4,
+     'skip_drop': 0.00026092912897969413}
 
-    pprint(study.best_params)
-    params = study.best_params
     X_train, y_train, X_test, y_test = load_data(
         features=feature,
         train_val_seasons=DEFAULT_TRAIN_SEASONS,
@@ -164,7 +180,7 @@ def main():
         project_name="ift-6758-milestone-2",
         workspace="axelbogos",
     )
-    model = XGBClassifier(objective='binary:logistic', **params)
+    model = XGBClassifier(**params)
     X_train = X_train.drop(columns=X_train.columns.difference(X_test.columns))
     X_test = X_test.drop(columns=X_test.columns.difference(X_train.columns))
     model.fit(X_train, y_train)
