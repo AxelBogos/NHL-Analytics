@@ -1,24 +1,28 @@
-import shap
 from comet_ml import Experiment
+import shap
+import pandas as pd
+
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.feature_selection import chi2
 from xgboost import XGBClassifier
 # import figure plot
 from sklearn.model_selection import cross_val_score
+import pickle
 
 from create_figure import *
-
-# utils_path = os.path.abspath(os.path.join('..'))
-# sys.path.append(utils_path)
-# from utils import *
-from ift6758.models.utils import *
+import sys
+utils_path = os.path.abspath(os.path.join('..'))
+sys.path.append(utils_path)
+from utils import *
+#from ift6758.models.utils import *
 import os
 from dotenv import load_dotenv
 load_dotenv()
 COMET_API_KEY = os.getenv('COMET_API_KEY') 
 
 def shap_feature(X, y, model):
+
     xgb_model = model.fit(X, y)
 
     # explain the model's predictions using SHAP
@@ -36,10 +40,12 @@ def feature_selection(df_X, df_y, model):
 
     # Normalization 
     # Zscore and Min-Max normalization
-    cols = ['x_coordinate', 'y_coordinate', 'game_time(s)',
-            'prev_event_x', 'prev_event_y', 'time_since_prev_event',
-            'distance_to_prev_event', 'speed_since_prev_event',
-            'shot_distance', 'shot_angle', 'change_in_angle']
+    cols = ['x_coordinate', 'y_coordinate',
+               'game_time(s)', 'prev_event_x', 'prev_event_y',
+               'time_since_prev_event', 'distance_to_prev_event',
+               'speed_since_prev_event', 'shot_distance', 'shot_angle',
+               'change_in_angle', 'time_since_pp'
+               ]
     
     df_zscore = df_X.copy()
     df_minmax = df_X.copy()
@@ -128,23 +134,60 @@ def main():
                'change_in_angle', 'shot_type', 'prev_event_type', 'time_since_pp',
                'home_strength', 'away_strength']
     
-    df_X, df_y,_,_ = load_data(feature, do_split_val=False, one_hot_encode_categoricals=True)
-    params = {'objective': 'binary:logistic', 'use_label_encoder': True, 'base_score': 0.5, 'booster': 'dart', 'colsample_bylevel': 1,
-              'colsample_bynode': 1, 'colsample_bytree': 1, 'gamma': 1.0644957574704856e-06, 'gpu_id': -1, 'importance_type': 'gain',
-              'interaction_constraints': '', 'learning_rate': 0.253149986, 'max_delta_step': 0, 'max_depth': 8, 'min_child_weight': 1,
-              'monotone_constraints': '()', 'n_estimators': 709, 'n_jobs': 4, 'num_parallel_tree': 1, 'random_state': 0,
-              'reg_alpha': 1.86814141e-05, 'reg_lambda': 1.74496799e-05, 'scale_pos_weight': 4, 'subsample': 1,
-              'tree_method': 'exact','validate_parameters': 1, 'verbosity': None, 'alpha': 1.8681414898850136e-05,
-              'eta': 0.2531499873091687,'grow_policy': 'depthwise', 'lambda': 1.744968010669035e-05,
-              'normalize_type': 'forest', 'rate_drop': 0.047822250564598025,'sample_type': 'uniform',
-              'skip_drop': 0.00026092912897969413}
-    xgb_model = XGBClassifier(**params)
+    df_X, df_y, _, _ = load_data(
+        features=feature,
+        train_val_seasons=DEFAULT_TRAIN_SEASONS,
+        test_season=DEFAULT_TEST_SEASONS,
+        do_split_val=False,
+        target='is_goal',
+        use_standard_scaler=False,
+        drop_all_na=True,
+        convert_bool_to_int=True,
+        one_hot_encode_categoricals=True
+    )
     
+    params = {'objective':'binary:logistic',
+              'use_label_encoder': True,
+              'base_score': 0.5,
+              'colsample_bylevel': 1,
+              'colsample_bynode': 1,
+              'colsample_bytree': 1,
+              'gamma': 1.0644957574704856e-06,
+              'gpu_id': -1,
+              'importance_type':'gain',
+              'interaction_constraints':'',
+              'learning_rate': 0.253149986,
+              'max_delta_step': 0,
+              'max_depth': 8,
+              'min_child_weight': 1,
+              'monotone_constraints':'()',
+              'n_estimators': 709,
+              'n_jobs': 4,
+              'num_parallel_tree': 1,
+              'random_state': 0,
+              'reg_alpha': 1.86814141e-05,
+              'reg_lambda': 1.74496799e-05,
+              'scale_pos_weight': 4,
+              'subsample': 1,
+              'tree_method':'exact',
+              'validate_parameters': 1,
+              'verbosity': None,
+              'alpha': 1.8681414898850136e-05,
+              'eta': 0.2531499873091687,
+              'grow_policy':'depthwise',
+              'lambda': 1.744968010669035e-05,
+              'use_label_encoder': False,
+              'eval_metric'      :  'error'
+    }
+    
+    xgb_model = XGBClassifier(**params)
+      
     result = feature_selection(df_X, df_y, xgb_model)
     
-    X = df_X.to_numpy()
-    y = df_y.to_numpy()
-    shap_feature(X, y, xgb_model)
+    shap_feature(df_X, df_y, xgb_model)
+    
+    file_name = "xgb_feature.pkl"
+    pickle.dump(xgb_model, open(file_name, "wb"))
     
     experiment = Experiment(
         api_key=COMET_API_KEY,
@@ -152,8 +195,7 @@ def main():
         workspace="axelbogos",
     )
     experiment.log_metrics(result)
-    #TODO LOG MODEL & metrics
-    
+    experiment.log_model('5_3 best feature', 'xgb_feature.pkl')
     print('result is = ',result)
 if __name__ == "__main__":
     main()
