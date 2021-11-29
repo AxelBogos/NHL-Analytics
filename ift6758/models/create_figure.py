@@ -92,7 +92,10 @@ def fig_goal_rate(y_val, y_pred_vec, fig_number,model_names,experiment=None) -> 
     fig = plt.figure(figsize=(10, 10))
     for idx, y_pred in enumerate(y_pred_vec):
         # plot GOAL RATE
-        test_est = np.array([np.round(y_pred * 100), y_val]).T
+
+        if y_val.shape != y_pred.shape:
+            y_pred = y_pred.reshape(-1)
+        test_est = np.array([np.array(np.round(y_pred * 100)), y_val]).T
         df_test_est = pd.DataFrame(test_est)
 
         g = df_test_est.groupby(0)
