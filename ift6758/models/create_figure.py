@@ -92,7 +92,10 @@ def fig_goal_rate(y_val, y_pred_vec, fig_number,model_names,experiment=None) -> 
     fig = plt.figure(figsize=(10, 10))
     for idx, y_pred in enumerate(y_pred_vec):
         # plot GOAL RATE
-        test_est = np.array([np.round(y_pred * 100), y_val]).T
+
+        if y_val.shape != y_pred.shape:
+            y_pred = y_pred.reshape(-1)
+        test_est = np.array([np.array(np.round(y_pred * 100)), y_val]).T
         df_test_est = pd.DataFrame(test_est)
 
         g = df_test_est.groupby(0)
@@ -152,7 +155,6 @@ def calibration_fig(y_val, y_pred_vec, fig_number,model_names,experiment=None) -
 
     plt.grid(color='gray', linestyle='--', linewidth=0.5)
     fig_name = f'{fig_number}_calibration.png'
-    plt.title(f"{fig_number} Calibration Curve")
     plt.savefig(os.path.join(FIGURE_PATH, fig_name))
     plt.legend(loc="center right")
     if experiment != None:
@@ -160,3 +162,4 @@ def calibration_fig(y_val, y_pred_vec, fig_number,model_names,experiment=None) -
     plt.show()
     plt.close()
     return None
+
