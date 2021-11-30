@@ -82,59 +82,6 @@ def objective(trial):
     return np.mean(cv_scores)
 
 
-def xgb_grid_search(X_train, X_val, y_train, y_val, samp_per):
-    '''
-    Grid search for the best hyper parameter
-    because database too large, random sampling x% of train, val for searching param
-        0.1: random sampling 10% of train, val
-        1  : do not sampling database
-    '''
-    rng = np.random.default_rng()
-    # random sampling
-    if samp_per < 1:
-        sample_train = rng.choice(X_train.shape[0], size=round(X_train.shape[0] * samp_per), replace=False)
-        sample_val = rng.choice(X_val.shape[0], size=round(X_val.shape[0] * samp_per), replace=False)
-
-        X_train = X_train[sample_train, :]
-        y_train = y_train[sample_train]
-        X_val = X_val[sample_val, :]
-        y_val = y_val[sample_val]
-
-    xgb = XGBClassifier(objective='binary:logistic', eval_metric='error')
-
-    params = {
-        'min_child_weight': [1],
-        'gamma': [0.5],
-        'subsample': [0.7],
-        'learning_rate': [0.01, 0.1, 0.2],
-        'colsample_bytree': [0.4, 0.6, 0.8],
-        'max_depth': [4, 5, 6],
-        'n_estimators': [400, 700, 1000],
-        'reg_alpha': [1.3],
-        'reg_lambda': [1.1]
-    }
-
-    grid_search = GridSearchCV(
-        estimator=xgb,
-        param_grid=params,
-        scoring=make_scorer(accuracy_score),
-        n_jobs=10,
-        cv=5,
-        verbose=True
-    )
-
-    model = grid_search.fit(X_train, y_train)
-
-    predict = model.predict(X_val)
-    accuracy = accuracy_score(y_val, predict)
-    print('Best AUC Score: {}'.format(model.best_score_))
-    print('Accuracy: {}'.format(accuracy))
-
-    print(model.best_params_)
-
-    return model, accuracy
-
-
 def main():
     '''
     grid search for the best model

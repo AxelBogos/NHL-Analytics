@@ -2,7 +2,7 @@ import os.path
 import pandas as pd
 from typing import List
 from sklearn.preprocessing import StandardScaler
-from sklearn import feature_extraction
+
 import numpy as np
 
 TIDY_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'tidy_data.csv')
@@ -57,7 +57,10 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
         val = val.reset_index()
         test = test.dropna(subset=features)
         test = test.reset_index()
-
+    
+    #Removing goals that are known outliers (further than 100 feet away goals that are not empty net)
+    df= df.drop(df[(df.shot_distance > 100.) & (df.is_goal == True) &(df.is_empty_net != True) ].index)        
+        
     # Split X, y
     X_train, y_train = train.drop(train.columns.difference(features), axis=1), train[target]
     X_val, y_val = val.drop(val.columns.difference(features), axis=1), val[target]
