@@ -11,7 +11,7 @@ from pprint import pprint
 import pickle
 
 # import figure plot
-from create_figure import *
+from ift6758.models.create_figure import *
 
 # utils_path = os.path.abspath(os.path.join('..'))
 # sys.path.append(utils_path)
@@ -137,10 +137,10 @@ def main():
     y_pred_vec = [y_pred]
     model_names=['Tuned XGB']
     fig_number = '5-2'
-    fig_roc_auc(y_test, y_pred_vec, fig_number, model_names)
-    fig_cumulative_goal(y_test, y_pred_vec, fig_number, model_names)
-    fig_goal_rate(y_test, y_pred_vec, fig_number, model_names)
-    calibration_fig(y_test, y_pred_vec, fig_number, model_names)
+    fig_roc_auc(y_test, y_pred_vec, fig_number, model_names,experiment)
+    fig_cumulative_goal(y_test, y_pred_vec, fig_number, model_names,experiment)
+    fig_goal_rate(y_test, y_pred_vec, fig_number, model_names,experiment)
+    calibration_fig(y_test, y_pred_vec, fig_number, model_names,experiment)
 
     # save xgb_model
     file_name = "tuned_xgb_model.pkl"

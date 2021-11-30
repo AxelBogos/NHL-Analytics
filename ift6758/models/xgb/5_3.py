@@ -10,7 +10,7 @@ from xgboost import XGBClassifier
 from sklearn.model_selection import cross_val_score
 import pickle
 
-from create_figure import *
+from ift6758.models.create_figure import *
 import sys
 utils_path = os.path.abspath(os.path.join('..'))
 sys.path.append(utils_path)
