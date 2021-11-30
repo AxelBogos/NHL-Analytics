@@ -47,7 +47,7 @@ class HockeyDataLoader:
             assert_year(year)
 
         # Regular Season game-ids
-        if year == '2016':
+        if year <= '2016':
             no_of_games = 1231  # 1230 matches in 2016, a new team was introduced after
         elif year == '2020':
             no_of_games = 869  # 868 matches in 2020 because of covid
@@ -128,11 +128,11 @@ def assert_year(year) -> None:
     :return: None
     """
     assert (len(year) == 4)
-    assert (2016 <= int(year) <= 2020)
+    assert (2015 <= int(year) <= 2020)
 
 
 def main():
-    hockey_data_loader = HockeyDataLoader(['2016', '2017', '2018', '2019', '2020'])
+    hockey_data_loader = HockeyDataLoader(['2015','2016', '2017', '2018'])
     hockey_data_loader.acquire_all_data()
 
 
