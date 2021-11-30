@@ -2,6 +2,7 @@ import os.path
 import pandas as pd
 from typing import List
 from sklearn.preprocessing import StandardScaler
+
 import numpy as np
 
 TIDY_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'tidy_data.csv')
@@ -97,3 +98,4 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
         return X_train, y_train, X_val, y_val, X_test, y_test
     else:
         return X_train, y_train, X_test, y_test
+
