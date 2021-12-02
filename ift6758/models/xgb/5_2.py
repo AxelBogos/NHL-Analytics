@@ -91,7 +91,15 @@ def main():
     study = optuna.create_study(pruner=optuna.pruners.MedianPruner(n_warmup_steps=5),
                                 direction="maximize", study_name="XGB Classifier")
     func = lambda trial: objective(trial)
-    study.optimize(func, n_trials=50)
+    study.optimize(func, n_trials=75)
+
+    # Save study plots
+    fig = optuna.visualization.plot_optimization_history(study)
+    fig.show()
+    fig.write_html('5-2_optuna_optim_history.html')
+    fig = optuna.visualization.plot_param_importances(study)
+    fig.show()
+    fig.write_html('5-2_hyperparam_importance.html')
     print(f"\tBest params:")
 
     pprint(study.best_params)
@@ -143,6 +151,9 @@ def main():
     calibration_fig(y_test, y_pred_vec, fig_number, model_names,experiment)
 
     # save xgb_model
+    file_name = "tuned_xgb_model.pkl"
+
+    # save
     file_name = "tuned_xgb_model.pkl"
 
     # save
