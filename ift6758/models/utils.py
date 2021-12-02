@@ -1,20 +1,24 @@
 import os.path
 import pandas as pd
-from typing import List
-from sklearn.preprocessing import StandardScaler
+
 
 import numpy as np
+	
+from typing import List
+from comet_ml import Experiment
+from sklearn.preprocessing import StandardScaler
+from sklearn import feature_extraction
 
 TIDY_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'tidy_data.csv')
 # TODO double-check which seasons we should be using. Milestone2 description seems inconsistent with Milestone 1 data.
-DEFAULT_TRAIN_SEASONS = ['20152016','20162017', '20172018', '20182019']
+DEFAULT_TRAIN_SEASONS = ['20152016','20162017','20172018','20182019']
 DEFAULT_TEST_SEASONS = ['20192020']
 
 
 def load_data(features: List[str], train_val_seasons: List[str] = None, test_season: List[str] = None,
               train_val_ratio: float = 0.2, target: str = 'is_goal', use_standard_scaler: bool = True,
-              return_as_numpy: bool = False, drop_all_na: bool = False, do_split_val: bool = True,
-              convert_bool_to_int=True, one_hot_encode_categoricals = False) -> tuple:
+              return_as_numpy: bool = False, drop_all_na: bool = True, do_split_val: bool = True,
+              convert_bool_to_int=True, one_hot_encode_categoricals = True) -> tuple:
     """
     Loads the dataset, drops all but the desired features and target var and returns the train_val_test split.
     :param features: List of features to be used as strings. Ex: ['shot_distance']
@@ -42,7 +46,14 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
 
     # Convert to numeric classes
     df[target] = df[target].astype(int)
-
+    
+    #Removing goals that are known outliers (further than 100 feet away goals that are not empty net)
+    df= df.drop(df[(df.shot_distance > 100.) & (df.is_goal == True) &(df.is_empty_net != True) ].index)
+    
+    #bringing all shots to the same ringside for easier modeling
+    #df["y_coordinate"] = (df["y_coordinate"].to_numpy()*(1 - 2*np.asarray([df.x_coordinate < 0], dtype= np.float32))).T
+    #df["x_coordinate"] = abs(df["x_coordinate"])
+    
     # Split train-val-test by seasons
     train = df[df['season'].astype(str).isin(train_val_seasons)]
     val = train.sample(frac=train_val_ratio, random_state=0)
@@ -57,14 +68,13 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
         val = val.reset_index()
         test = test.dropna(subset=features)
         test = test.reset_index()
-    
-    #Removing goals that are known outliers (further than 100 feet away goals that are not empty net)
-    df= df.drop(df[(df.shot_distance > 100.) & (df.is_goal == True) &(df.is_empty_net != True) ].index)        
-        
+
     # Split X, y
     X_train, y_train = train.drop(train.columns.difference(features), axis=1), train[target]
     X_val, y_val = val.drop(val.columns.difference(features), axis=1), val[target]
     X_test, y_test = test.drop(test.columns.difference(features), axis=1), test[target]
+    
+    
 
 
     # Scale numeric columns
@@ -98,4 +108,3 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
         return X_train, y_train, X_val, y_val, X_test, y_test
     else:
         return X_train, y_train, X_test, y_test
-

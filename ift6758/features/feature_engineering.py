@@ -25,6 +25,7 @@ def add_offensive_side_feature(df: pd.DataFrame, inplace: bool = False) -> pd.Da
     coordinates['offensive_side'] = np.sign(coordinates['x_coordinate'])
     coordinates = coordinates.drop(['x_coordinate'], axis=1)
     result = pd.merge(df, coordinates, on=['game_id', 'team', 'period'], how='left')
+    
     return result
 
 
