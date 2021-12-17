@@ -37,7 +37,6 @@ def before_first_request():
     """
     global CLASSIFIER  # make this variable global to the scope of the app
 
-    # TODO: setup basic logging configuration
     logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
 
     request = {
@@ -45,6 +44,7 @@ def before_first_request():
         'registry_name': '6-lgbm',
         'version': '1.0.0',
     }
+
     if not os.path.isfile(os.path.join(LOADED_MODELS_DIR, DEFAULT_MODEL_NAME)):
         API(api_key=os.getenv('COMET_API_KEY')).download_registry_model(**request, output_path=LOADED_MODELS_DIR)
     CLASSIFIER = pickle.load(open(os.path.join(LOADED_MODELS_DIR, DEFAULT_MODEL_NAME), 'rb'))
@@ -84,7 +84,9 @@ def download_registry_model():
             request = {'workspace': "axelbogos",'registry_name': '6-4-stacked-trained-tuned-model','model_name': 'tuned_stacked_trained_model.pkl','version': '1.0.0'}
             r = requests.post("http://0.0.0.0:8080/download_registry_model",json=request)
     """
-    global CLASSIFIER # make this variable global to the scope of the app
+
+    global CLASSIFIER  # make this variable global to the scope of the app
+
     # Get POST json data
     json = request.get_json()
     app.logger.info(json)
@@ -114,7 +116,7 @@ def download_registry_model():
             app.logger.info(f'Download failed. Current model loaded is {str(CLASSIFIER)}.')
             response = 'Fail'
 
-        app.logger.info(response)
+    app.logger.info(response)
     return jsonify(response)  # response must be json serializable!
 
 
@@ -122,19 +124,40 @@ def download_registry_model():
 def predict():
     """
     Handles POST requests made to http://IP_ADDRESS:PORT/predict
-    Examples of a request:
+    Example of how to test this endpoint with the default lgbm model:
+    *--------------EXAMPLE------------------------*
+    import requests
+    from ift6758.models.utils import *
+
+    feature_list = ['shot_type', 'strength', 'is_playoff', 'prev_event_type', 'time_since_prev_event', 'is_rebound',
+                    'distance_to_prev_event', 'speed_since_prev_event', 'is_penalty_shot', 'shot_distance',
+                    'shot_angle', 'change_in_angle', 'time_since_pp', 'relative_strength']
+
+    X, y, X_test, y_test = load_data(
+        features=feature_list,
+        train_val_seasons=DEFAULT_TRAIN_SEASONS,
+        test_season=DEFAULT_TEST_SEASONS,
+        do_split_val=False,
+        target='is_goal',
+        use_standard_scaler=True,
+        drop_all_na=False,
+        convert_bool_to_int=True,
+        one_hot_encode_categoricals=True
+    )
+    X = X.drop(columns=X.columns.difference(X_test.columns))
+    X_test = X_test.drop(columns=X_test.columns.difference(X.columns))
+    r = requests.post("http://0.0.0.0:8080/predict", json=X_test.to_json())
+    *--------------END EXAMPLE------------------------*
+
     Returns predictions
     """
+    global CLASSIFIER
     # Get POST json data
-    json = request.get_json()
-    print(json)
-    app.logger.info(json)
+    df_json = request.get_json()
+    app.logger.info(df_json)
+    df = pd.read_json(df_json)
 
-    # TODO:
-    raise NotImplementedError("TODO: implement this enpdoint")
-
-    response = None
-
+    response = CLASSIFIER.predict_proba(df)
     app.logger.info(response)
     return jsonify(response)  # response must be json serializable!
 
