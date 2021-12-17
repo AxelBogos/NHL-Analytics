@@ -2,7 +2,7 @@ import json
 import requests
 import pandas as pd
 import logging
-
+from ift6758.models.utils import load_data
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,16 @@ class ServingClient:
             features = ["distance"]
         self.features = features
 
-        # any other potential initialization
+        self.model_registries_to_file_name = {
+            # TODO add the logistic reg models?
+            '6-lgbm': '6-LGBM.pkl',
+            '5-2-grid-search-model': 'tuned_xgb_model.pkl',
+            '5-3-best-feature': 'xgb_feature.pkl',
+            '6-2-nn-tuned-model': 'tuned_nn_model.pkl',
+            '6-3-adaboost-tuned-model': 'tuned_adaboost_model.pkl',
+            '6-4-stacked-trained-tuned-model': 'tuned_stacked_trained_model.pkl',
+        }
+
 
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
         """
@@ -27,13 +36,18 @@ class ServingClient:
         Args:
             X (Dataframe): Input dataframe to submit to the prediction service.
         """
+        X = X.drop(X.columns.difference(self.features), axis=1)
+        X = X.reset_index()
+        r = requests.post(f"{self.base_url}/predict", json=X.to_json())
+        result = pd.read_json(r.json())
+        return result
 
-        raise NotImplementedError("TODO: implement this function")
 
     def logs(self) -> dict:
         """Get server logs"""
 
-        raise NotImplementedError("TODO: implement this function")
+        r = requests.get(f"{self.base_url}/logs")
+        return r.json()
 
     def download_registry_model(self, workspace: str, model: str, version: str) -> dict:
         """
@@ -51,4 +65,10 @@ class ServingClient:
             version (str): The model version to download
         """
 
-        raise NotImplementedError("TODO: implement this function")
+        assert model in self.model_registries_to_file_name.keys(), f'model name must be in ' \
+                                                                   f'{self.model_registries_to_file_name.keys()} '
+        model_file_name = self.model_registries_to_file_name[model]
+        request = {'workspace': workspace, 'registry_name': model, 'model_name': model_file_name, 'version': version}
+        r = requests.post(f"{self.base_url}/download_registry_model", json=request)
+        return r.json()
+
