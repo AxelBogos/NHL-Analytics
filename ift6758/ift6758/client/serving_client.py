@@ -2,8 +2,8 @@ import json
 import requests
 import pandas as pd
 import logging
-from ift6758.client.feature_lists import *
-from ift6758.models.utils import load_data
+from ift6758.ift6758.client.feature_lists import *
+from ift6758.ift6758.models.utils import load_data
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class ServingClient:
         
         for column in self.features:
             if column not in X.columns:
-                x[column] = np.zeros(x.shape[0])
+                X[column] = np.zeros(X.shape[0])
         
         X = X[self.features] #need to make sure columns are in the same order as training time
         X = X.reset_index()
