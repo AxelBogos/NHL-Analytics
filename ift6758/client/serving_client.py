@@ -18,11 +18,11 @@ class ServingClient:
         self.features = features
 
         self.model_registries_to_file_name = {
-            # TODO add the logistic reg models?
             '6-lgbm': ('6-LGBM.pkl', feature_list_lgbm),
             '5-2-grid-search-model': ('tuned_xgb_model.pkl', feature_list_xgb),
             '6-2-nn-tuned-model': ('tuned_nn_model.pkl', feature_list_nn),
-            '6-4-stacked-trained-tuned-model': ('tuned_stacked_trained_model.pkl',feature_list_stack_trained)
+            '6-4-stacked-trained-tuned-model': ('tuned_stacked_trained_model.pkl',feature_list_stack_trained),
+            '3-3-angle-dist-logreg-model':('LogReg_dist_angle_model.pkl',feature_list_logreg)
         }
 
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
