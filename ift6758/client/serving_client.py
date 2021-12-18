@@ -26,7 +26,6 @@ class ServingClient:
             '6-4-stacked-trained-tuned-model': 'tuned_stacked_trained_model.pkl',
         }
 
-
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
         """
         Formats the inputs into an appropriate payload for a POST request, and queries the
@@ -41,7 +40,6 @@ class ServingClient:
         r = requests.post(f"{self.base_url}/predict", json=X.to_json())
         result = pd.read_json(r.json())
         return result
-
 
     def logs(self) -> dict:
         """Get server logs"""
@@ -71,4 +69,5 @@ class ServingClient:
         request = {'workspace': workspace, 'registry_name': model, 'model_name': model_file_name, 'version': version}
         r = requests.post(f"{self.base_url}/download_registry_model", json=request)
         return r.json()
+
 

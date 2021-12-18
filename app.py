@@ -53,7 +53,12 @@ def before_first_request():
 
 @app.route("/logs", methods=["GET"])
 def logs():
-    """Reads data from the log file and returns them as the response"""
+    """Reads data from the log file and returns them as the response
+
+    Example:
+        r = requests.get("http://0.0.0.0:8080/logs")
+
+    """
     with open('flask.log') as f:
         response = f.read()
     return jsonify(response)  # response must be json serializable!
@@ -66,6 +71,7 @@ def download_registry_model():
     The comet API key should be retrieved from the ${COMET_API_KEY} environment variable.
     Examples of requests:
         LGBM:
+            import requests
             request = {'workspace': "axelbogos",'registry_name': '6-lgbm','model_name': '6-LGBM.pkl','version': '1.0.0'}
             r = requests.post("http://0.0.0.0:5000/download_registry_model",json=request)
         5-2 XGB:
