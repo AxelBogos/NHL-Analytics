@@ -2,6 +2,7 @@ import json
 import requests
 import pandas as pd
 import logging
+from ift6758.client.feature_lists import *
 from ift6758.models.utils import load_data
 
 logger = logging.getLogger(__name__)
@@ -18,12 +19,10 @@ class ServingClient:
 
         self.model_registries_to_file_name = {
             # TODO add the logistic reg models?
-            '6-lgbm': '6-LGBM.pkl',
-            '5-2-grid-search-model': 'tuned_xgb_model.pkl',
-            '5-3-best-feature': 'xgb_feature.pkl',
-            '6-2-nn-tuned-model': 'tuned_nn_model.pkl',
-            '6-3-adaboost-tuned-model': 'tuned_adaboost_model.pkl',
-            '6-4-stacked-trained-tuned-model': 'tuned_stacked_trained_model.pkl',
+            '6-lgbm': ('6-LGBM.pkl', feature_list_lgbm),
+            '5-2-grid-search-model': ('tuned_xgb_model.pkl', feature_list_xgb),
+            '6-2-nn-tuned-model': ('tuned_nn_model.pkl', feature_list_nn),
+            '6-4-stacked-trained-tuned-model': ('tuned_stacked_trained_model.pkl',feature_list_stack_trained)
         }
 
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
@@ -35,7 +34,12 @@ class ServingClient:
         Args:
             X (Dataframe): Input dataframe to submit to the prediction service.
         """
-        X = X.drop(X.columns.difference(self.features), axis=1)
+        
+        for column in self.features:
+            if column not in X.columns:
+                x[column] = np.zeros(x.shape[0])
+        
+        X = X[self.features] #need to make sure columns are in the same order as training time
         X = X.reset_index()
         r = requests.post(f"{self.base_url}/predict", json=X.to_json())
         result = pd.read_json(r.json())
@@ -65,7 +69,8 @@ class ServingClient:
 
         assert model in self.model_registries_to_file_name.keys(), f'model name must be in ' \
                                                                    f'{self.model_registries_to_file_name.keys()} '
-        model_file_name = self.model_registries_to_file_name[model]
+        model_file_name = self.model_registries_to_file_name[model][0]
+        self.features = self.model_registries_to_file_name[model][1]
         request = {'workspace': workspace, 'registry_name': model, 'model_name': model_file_name, 'version': version}
         r = requests.post(f"{self.base_url}/download_registry_model", json=request)
         return r.json()
