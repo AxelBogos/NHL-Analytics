@@ -42,7 +42,7 @@ def before_first_request():
     request = {
         'workspace': "axelbogos",
         'registry_name': '6-lgbm',
-        'version': '1.0.0',
+        'version': '1.0.1',
     }
 
     if not os.path.isfile(os.path.join(LOADED_MODELS_DIR, DEFAULT_MODEL_NAME)):
