@@ -1,57 +1,32 @@
-# To build a container, you will use the docker build command
-# https://docs.docker.com/engine/reference/commandline/build/
-#
-#   docker build -t <IMAGE TAG> -f Dockerfile.serving .
-#   docker build -t <IMAGE TAG> -f Dockerfile.jupyter .
-#
+FROM python:3.8
+ARG COMET_API_KEY
 
-
-# https://docs.docker.com/engine/reference/builder/#from
-# You shouldn't need to change this
-FROM python:3.7
-
-# https://docs.docker.com/engine/reference/builder/#workdir
-# Create and cd into /code as your working directory
 WORKDIR /code
+COPY /ift6758/requirements.txt /code
 
 
-# The main docker commands you will find useful:
-# 
-# Add a file or directory
-# https://docs.docker.com/engine/reference/builder/#add
-#
-#       ADD ./<SOURCE_DIR/FILE> ./<DOCKER_DIR/FILE>
-#
-# Run a shell command (tip: chain shell commands with && rather than multiple RUN commands)
-# https://docs.docker.com/engine/reference/builder/#run
-#
-#       RUN <SHELL COMMAND>   
-#
-# Set an environment variable:
-# https://docs.docker.com/engine/reference/builder/#env
-#
-#       ENV <ENV_VAR>=<DEFAULT>
-#
-# Expose a port
-# https://docs.docker.com/engine/reference/builder/#port
-#
-#       EXPOSE <PORT>
-#
-# Provide default command for executing container
-# https://docs.docker.com/engine/reference/builder/#cmd
-#
-#       CMD <SHELL COMMAND>
+# add code, optionally a default model if you want
+
+COPY ./loaded_models/6-LGBM.pkl /code
+RUN mkdir /code/client
+COPY ./ift6758/ift6758/client /code/client
+RUN mkdir /code/features
+COPY ./ift6758/ift6758/features /features
+RUN mkdir /code/models
+COPY ./ift6758/ift6758/models /models
+RUN mkdir /code/visualizations
+COPY ./ift6758/ift6758/visualizations /visualizations
+COPY ./app.py /
 
 
+# install libs
+RUN pip install --upgrade pip
+# RUN pip install -r requirements.txt
 
-# TODO: add code, optionally a default model if you want 
+# Environment variables
+ENV COMET_API_KEY=$COMET_API_KEY
 
+# expose ports
+EXPOSE 5000
 
-# TODO: install libs
-
-
-# TODO: expose ports (or do this in docker-compose)
-
-
-# TODO: specify default command - this is not required because you can always specify the command
-# either with the docker run command or in the docker-compose file
+CMD ['app.py']
