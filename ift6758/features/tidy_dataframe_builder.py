@@ -294,8 +294,250 @@ class DataFrameBuilder:
 
         
         return game_data
+    
+    def parse_penalty_data_ongoing(self, json_data, first_run = True, home_strength = 5, away_strength = 5, homepenaltylist = [], awaypenaltylist = [],
+                                   homemajorlist = [], awaymajorlist = [], homepenaltystart = None, awaypenaltystart = None, start_event = 0) -> list:
+       
+        game_data = []  # List of event dict
+        event_dict = {}  # dictionary containing all features of a shot/goal
+        
+        
 
-    def parse_game_data(self, json_data) -> list:
+        # Verify we have all the necessary basic json keys
+        if 'liveData' not in json_data or \
+                'plays' not in json_data['liveData'] or \
+                'allPlays' not in json_data['liveData']['plays']:
+            return [None] * len(self.features)
+        
+        home_team = json_data['gameData']['teams']['home']['name']
+        away_team = json_data['gameData']['teams']['away']['name']
+        
+        if first_run == True:
+            event_dict["period"] = 1
+            event_dict["period_time"] = "00:00"
+            event_dict["game_time"] = "00:00"
+            event_dict["game_id"] = json_data['gamePk']
+            event_dict["homepenaltystart"] = None
+            event_dict["awaypenaltystart"] = None
+            event_dict["home_strength"] = 5
+            event_dict["away_strength"] = 5
+            
+            game_data.append(event_dict.copy())
+            event_dict.clear()
+
+        for event_id, event in enumerate(json_data['liveData']['plays']['allPlays']):
+            if event_id <= start_event:
+               continue
+                    
+            if homemajorlist != []:
+                gametime = f"{(int(event['about']['period'] - 1) * 20) + int(event['about']['periodTime'].split(':')[0])}:" \
+                                   f"{ event['about']['periodTime'].split(':')[1]}"
+                
+                if gametime >= homemajorlist[0] or len(gametime) >= len(homemajorlist[0]):
+                    home_strength += 1
+                    
+                    event_dict['period'] = event['about']['period']
+                    event_dict['period_time'] = event['about']['periodTime']
+                    
+                    event_dict["game_time"] = homemajorlist[0]
+                    
+                    if home_strength == 5:
+                        homepenaltystart = None
+                    
+                    homemajorlist.pop(0)
+                    
+                    event_dict["home_strength"] = home_strength
+                    event_dict["away_strength"] = away_strength
+                    event_dict["homepenaltystart"] = homepenaltystart
+                    event_dict["awaypenaltystart"] = awaypenaltystart
+                    event_dict['game_id'] = json_data['gamePk']
+                    game_data.append(event_dict.copy())
+                    event_dict.clear()
+                    
+            if homepenaltylist != []:
+               
+                if event['result']['event'] == ('Goal') and event["team"]["name"] == away_team and home_strength != away_strength:
+                   
+                    
+                    event_dict['period'] = event['about']['period']
+                    event_dict['period_time'] = event['about']['periodTime']
+                    
+                    event_dict["game_time"] = f"{(int(event_dict['period']) - 1) * 20 + int(event_dict['period_time'].split(':')[0])}:" \
+                               f"{event_dict['period_time'].split(':')[1]}"
+                    
+                    homepenaltylist[0] = f"{int(event_dict['game_time'].split(':')[0]) -2}:" \
+                        f"{event_dict['game_time'].split(':')[1]}"
+
+                    
+                    if homepenaltylist[0] < event_dict["game_time"] or len(homepenaltylist[0]) < len(event_dict["game_time"]): #edge case going from sub 10 min to over 10 min, comparison between 9:59 and 11:59 don't work
+                        homepenaltylist.pop(0)
+                        home_strength += 1
+                    
+                    if home_strength == 5:
+                        homepenaltystart = None
+                        
+                    event_dict["home_strength"] = home_strength
+                    event_dict["away_strength"] = away_strength
+                    event_dict["homepenaltystart"] = homepenaltystart
+                    event_dict["awaypenaltystart"] = awaypenaltystart
+                    event_dict['game_id'] = json_data['gamePk']
+                    game_data.append(event_dict.copy())
+                    event_dict.clear()
+                    continue
+                
+                gametime = f"{(int(event['about']['period'] - 1) * 20) + int(event['about']['periodTime'].split(':')[0])}:" \
+                               f"{ event['about']['periodTime'].split(':')[1]}"
+                #print(gametime)
+                #print(homepenaltylist[0])
+                #print(gametime >=homepenaltylist[0])
+                if gametime >= homepenaltylist[0] or len(gametime) > len(homepenaltylist[0]):
+                    home_strength += 1
+                    #print(homepenaltylist)
+                    
+                    event_dict['period'] = event['about']['period']
+                    event_dict['period_time'] = event['about']['periodTime']
+                    
+                    event_dict["game_time"] = homepenaltylist[0]
+                    
+                    if home_strength == 5:
+                        homepenaltystart = None
+                    
+                    homepenaltylist.pop(0)    
+                    
+                    event_dict["home_strength"] = home_strength
+                    event_dict["away_strength"] = away_strength
+                    event_dict["homepenaltystart"] = homepenaltystart
+                    event_dict["awaypenaltystart"] = awaypenaltystart
+                    event_dict['game_id'] = json_data['gamePk']
+                    game_data.append(event_dict.copy())
+                    event_dict.clear()
+                    
+         
+            if awaymajorlist != []:
+                gametime = f"{(int(event['about']['period'] - 1) * 20) + int(event['about']['periodTime'].split(':')[0])}:" \
+                                   f"{ event['about']['periodTime'].split(':')[1]}"
+                
+                if gametime >= awaymajorlist[0] or len(gametime) > len(awaymajorlist[0]):
+                    away_strength += 1
+                    
+                    event_dict['period'] = event['about']['period']
+                    event_dict['period_time'] = event['about']['periodTime']
+                    
+                    event_dict["game_time"] = awaymajorlist[0]
+                    
+                    if away_strength == 5:
+                        awaypenaltystart = None
+                    
+                    awaymajorlist.pop(0)
+                    
+                    event_dict["home_strength"] = home_strength
+                    event_dict["away_strength"] = away_strength
+                    event_dict["homepenaltystart"] = homepenaltystart
+                    event_dict["awaypenaltystart"] = awaypenaltystart
+                    event_dict['game_id'] = json_data['gamePk']
+                    game_data.append(event_dict.copy())
+                    event_dict.clear()
+                    
+                    
+            if awaypenaltylist != []:
+                
+                if event['result']['event'] == ('Goal') and event["team"]["name"] == home_team and home_strength != away_strength:
+                    
+                    event_dict['period'] = event['about']['period']
+                    event_dict['period_time'] = event['about']['periodTime']
+                    
+                    event_dict["game_time"] = f"{(int(event_dict['period']) - 1) * 20 + int(event_dict['period_time'].split(':')[0])}:" \
+                               f"{event_dict['period_time'].split(':')[1]}"
+                    
+                    awaypenaltylist[0] = f"{int(event_dict['game_time'].split(':')[0]) -2}:"\
+                        f"{event_dict['game_time'].split(':')[1]}"
+                    
+                    if awaypenaltylist[0] < event_dict["game_time"] or len(awaypenaltylist[0]) < len(event_dict["game_time"]):
+                        awaypenaltylist.pop(0)
+                        away_strength +=1
+                    
+                    if away_strength == 5:
+                        awaypenaltystart = None
+                        
+                    event_dict["home_strength"] = home_strength
+                    event_dict["away_strength"] = away_strength
+                    event_dict["homepenaltystart"] = homepenaltystart
+                    event_dict["awaypenaltystart"] = awaypenaltystart
+                    event_dict['game_id'] = json_data['gamePk']
+                    game_data.append(event_dict.copy())
+                    event_dict.clear()
+                    continue
+                
+                gametime = f"{(int(event['about']['period'] - 1) * 20) + int(event['about']['periodTime'].split(':')[0])}:" \
+                               f"{event['about']['periodTime'].split(':')[1]}"
+                
+                if gametime >= awaypenaltylist[0] or len(gametime) > len(awaypenaltylist[0]):
+                    away_strength += 1
+                    
+                    event_dict['period'] = event['about']['period']
+                    event_dict['period_time'] = event['about']['periodTime']
+                    
+                    event_dict["game_time"] = awaypenaltylist[0]
+                    
+                    if away_strength == 5:
+                        awaypenaltystart = None
+                    
+                    awaypenaltylist.pop(0)    
+                    
+                    event_dict["home_strength"] = home_strength
+                    event_dict["away_strength"] = away_strength
+                    event_dict["homepenaltystart"] = homepenaltystart
+                    event_dict["awaypenaltystart"] = awaypenaltystart
+                    event_dict['game_id'] = json_data['gamePk']
+                    game_data.append(event_dict.copy())
+                    event_dict.clear()
+                     
+            
+            
+            if event['result']['event'] == 'Penalty' and (event["result"]["penaltySeverity"] in ['Minor', 'Bench Minor','Major'] )and (event['result']['secondaryType'] != 'Fighting'):
+                    
+                    
+                    event_dict['period'] = event['about']['period']
+                    event_dict['period_time'] = event['about']['periodTime']
+                    
+                    event_dict["game_time"] = f"{(int(event_dict['period']) - 1) * 20 + int(event_dict['period_time'].split(':')[0])}:" \
+                               f"{event_dict['period_time'].split(':')[1]}"
+                    if event["team"]["name"] == home_team:                        
+                        home_strength -= 1
+                        if event["result"]["penaltySeverity"]  in(["Minor", "Bench Minor"]):
+                            homepenaltylist.append(f"{int(event_dict['game_time'].split(':')[0]) + event['result']['penaltyMinutes']}:"\
+                                                 f"{event_dict['game_time'].split(':')[1]}")
+                        elif event["result"]["penaltySeverity"] == "Major":
+                            homemajorlist.append(f"{int(event_dict['game_time'].split(':')[0])+5}:"\
+                                                 f"{event_dict['game_time'].split(':')[1]}")
+                        if homepenaltystart == None:
+                            homepenaltystart = event_dict["game_time"]
+                        homepenaltylist.sort()
+                        
+                    elif event["team"]["name"] == away_team:
+                        away_strength -= 1
+                        if event["result"]["penaltySeverity"]  in(["Minor", "Bench Minor"]):
+                            awaypenaltylist.append(f"{int(event_dict['game_time'].split(':')[0])+ + event['result']['penaltyMinutes']}:"\
+                                                   f"{event_dict['game_time'].split(':')[1]}")
+                        elif event["result"]["penaltySeverity"] == "Major":
+                            awaymajorlist.append(f"{int(event_dict['game_time'].split(':')[0])+5}:"\
+                                                f"{event_dict['game_time'].split(':')[1]}")
+                        if awaypenaltystart == None:
+                            awaypenaltystart = event_dict["game_time"]
+                            awaypenaltylist.sort()    
+
+                    event_dict["home_strength"] = home_strength
+                    event_dict["away_strength"] = away_strength
+                    event_dict["homepenaltystart"] = homepenaltystart
+                    event_dict["awaypenaltystart"] = awaypenaltystart
+                    event_dict['game_id'] = json_data['gamePk']
+                    game_data.append(event_dict.copy())
+                    event_dict.clear()           
+
+        
+        return game_data, home_strength, away_strength, homepenaltylist, awaypenaltylist, homemajorlist, awaymajorlist, homepenaltystart, awaypenaltystart
+
+    def parse_game_data(self, json_data, start_event = 0) -> list:
         """
         Parses the required data from 1 json file (i.e. 1 game).
         :param json_data: json data to be parsed
@@ -313,6 +555,8 @@ class DataFrameBuilder:
         for event_id, event in enumerate(json_data['liveData']['plays']['allPlays']):
             # Only interested in goals and shots
             if event['result']['event'] not in ('Goal', 'Shot'):
+                continue
+            if event_id < start_event:
                 continue
 
             event_dict['game_id'] = json_data['gamePk']
