@@ -49,7 +49,7 @@ class ServingClient:
         
         for column in self.features:
             if column not in X.columns:
-                X[column] = np.zeros(x.shape[0])
+                X[column] = np.zeros(X.shape[0])
         
         X = X[self.features] #need to make sure columns are in the same order as training time
         X = X.reset_index()
