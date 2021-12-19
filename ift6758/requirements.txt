@@ -12,5 +12,5 @@ tqdm==4.62.2
 scipy==1.7.1
 plotly==5.1.0
 lxml==4.6.3
-comet_ml==3.21.0
+comet-ml==3.23.0
 flask==2.0.2
