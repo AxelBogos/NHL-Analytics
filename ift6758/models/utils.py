@@ -125,7 +125,7 @@ def load_live_data(features: List[str], data, target: str = 'is_goal', use_stand
         
         if drop_all_na:
             df = df.dropna(subset=features)
-            df = df.reset_index()
+
         
         df = df.drop(df.columns.difference(features), axis=1)
         
