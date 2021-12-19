@@ -1,9 +1,18 @@
+import os
+
+
+
 import json
 import requests
 import pandas as pd
 import logging
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+print(os.curdir)
 from ift6758.client.feature_lists import *
-from ift6758.models.utils import load_data
+# from ift6758.models.utils import load_live_data
+from sklearn.preprocessing import StandardScaler
+import pickle
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +25,7 @@ class ServingClient:
         if features is None:
             features = ["distance"]
         self.features = features
+        self.scaler = pickle.load(open('scaler.pkl','rb'))
 
         self.model_registries_to_file_name = {
             '6-lgbm': ('6-LGBM.pkl', feature_list_lgbm),
@@ -35,9 +45,11 @@ class ServingClient:
             X (Dataframe): Input dataframe to submit to the prediction service.
         """
         
+        X = load_live_data(features = feature_list,data = X, scaler =self.scaler)
+        
         for column in self.features:
             if column not in X.columns:
-                x[column] = np.zeros(x.shape[0])
+                X[column] = np.zeros(x.shape[0])
         
         X = X[self.features] #need to make sure columns are in the same order as training time
         X = X.reset_index()
@@ -68,7 +80,7 @@ class ServingClient:
         """
 
         assert model in self.model_registries_to_file_name.keys(), f'model name must be in ' \
-                                                                   f'{self.model_registries_to_file_name.keys()} '
+                                                                    f'{self.model_registries_to_file_name.keys()} '
         model_file_name = self.model_registries_to_file_name[model][0]
         self.features = self.model_registries_to_file_name[model][1]
         request = {'workspace': workspace, 'registry_name': model, 'model_name': model_file_name, 'version': version}
