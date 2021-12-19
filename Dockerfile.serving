@@ -2,26 +2,22 @@ FROM python:3.8
 ARG COMET_API_KEY
 
 WORKDIR /code
-COPY /ift6758/requirements.txt /code
+COPY /ift6758/requirements.txt .
 
 
 # add code, optionally a default model if you want
 
-COPY ./loaded_models/6-LGBM.pkl /code
-RUN mkdir /code/client
-COPY ./ift6758/ift6758/client /code/client
-RUN mkdir /code/features
-COPY ./ift6758/ift6758/features /features
-RUN mkdir /code/models
-COPY ./ift6758/ift6758/models /models
-RUN mkdir /code/visualizations
-COPY ./ift6758/ift6758/visualizations /visualizations
-COPY ./app.py /
+COPY ./loaded_models/6-LGBM.pkl .
+COPY ./ift6758/ift6758/client ./client
+COPY ./ift6758/ift6758/features ./features
+COPY ./ift6758/ift6758/models ./models
+COPY ./ift6758/ift6758/visualizations ./visualizations
+COPY ./app.py .
 
 
 # install libs
 RUN pip install --upgrade pip
-# RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Environment variables
 ENV COMET_API_KEY=$COMET_API_KEY
@@ -29,4 +25,4 @@ ENV COMET_API_KEY=$COMET_API_KEY
 # expose ports
 EXPOSE 5000
 
-CMD ['app.py']
+
