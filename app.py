@@ -72,22 +72,19 @@ def download_registry_model():
     Examples of requests:
         LGBM:
             import requests
-            request = {'workspace': "axelbogos",'registry_name': '6-lgbm','model_name': '6-LGBM.pkl','version': '1.0.0'}
+            request = {'workspace': "axelbogos",'registry_name': '6-lgbm','model_name': '6-LGBM.pkl','version': '1.0.1'}
             r = requests.post("http://0.0.0.0:5000/download_registry_model",json=request)
         5-2 XGB:
             request = {'workspace': "axelbogos",'registry_name': '5-2-grid-search-model','model_name': 'tuned_xgb_model.pkl','version': '2.0.0'}
             r = requests.post("http://0.0.0.0:5000/download_registry_model",json=request)
-        5-3 XGB:
-            request = {'workspace': "axelbogos",'registry_name': '5-3-best-feature','model_name': 'xgb_feature.pkl','version': '1.0.0'}
-            r = requests.post("http://0.0.0.0:5000/download_registry_model",json=request)
         6-2 NN:
             request = {'workspace': "axelbogos",'registry_name': '6-2-nn-tuned-model','model_name': 'tuned_nn_model.pkl','version': '1.0.0'}
             r = requests.post("http://0.0.0.0:5000/download_registry_model",json=request)
-        6-3 Adaboost:
-            request = {'workspace': "axelbogos",'registry_name': '6-3-adaboost-tuned-model','model_name': 'tuned_adaboost_model.pkl','version': '1.0.0'}
-            r = requests.post("http://0.0.0.0:5000/download_registry_model",json=request)
         6-4 Stacked Classifier:
             request = {'workspace': "axelbogos",'registry_name': '6-4-stacked-trained-tuned-model','model_name': 'tuned_stacked_trained_model.pkl','version': '1.0.0'}
+            r = requests.post("http://0.0.0.0:5000/download_registry_model",json=request)
+        3-3 Log Regression (Distance + Angle):
+            request = {'workspace': "axelbogos",'registry_name': '3-3-angle-dist-logreg-model','model_name': 'LogReg_dist_angle_model.pkl','version': '1.0.0'}
             r = requests.post("http://0.0.0.0:5000/download_registry_model",json=request)
     """
 
