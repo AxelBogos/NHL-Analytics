@@ -3,6 +3,12 @@ import requests
 import time
 import logging
 import os
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+os.chdir('../')
+os.chdir('../')
+
+
 from ift6758.features.tidy_dataframe_builder import  DataFrameBuilder
 from ift6758.features.feature_engineering  import add_shot_distance_feature, add_offensive_side_feature, add_shot_angle,\
     add_change_in_shot_angle
@@ -23,6 +29,8 @@ class Game_Client:
         self.game_id = game_id
         self.last_event_processed = 0
         self.file_path = os.path.join(self.save_path, f'{game_id}.json')
+        self.period = 1
+        self.time_left = "20:00"
 
     def ping_api(self):
         """
@@ -41,7 +49,7 @@ class Game_Client:
                 f.write(response.text)
                 game = json.load(f) 
                 DFB = DataFrameBuilder()
-                game_data = DFB.parse_game_data(game)
+                game_data, self.period, self.time_left = DFB.parse_live_game_data(game)
                 game_data = pd.DataFrame(game_data, columns=DFB.features)
                 # Append engineered features
                 game_data = add_offensive_side_feature(game_data)
@@ -104,7 +112,7 @@ class Game_Client:
             with open(self.file_path, 'r+') as f:
                 game = json.load(f)
                 DFB = DataFrameBuilder()
-                game_data = DFB.parse_game_data(game, start_event=self.last_event_processed)
+                game_data, self.period, self.time_left = DFB.parse_live_game_data(game, start_event=self.last_event_processed)
                 game_data = game_data[1:] #drop last_event which was processed last run
                 game_data = pd.DataFrame(game_data, columns=DFB.features)
                 # Append engineered features
@@ -151,6 +159,12 @@ class Game_Client:
                 
                 #correctly fill empty_net column, empty = False
                 game_data['is_empty_net'] = game_data['is_empty_net'].fillna(False)
+                
+                #Removing data that can't be used for predictions due to missing values
+                game_data = game_data.dropna()
+                
+                #filtering out shots that have a high probability of being due to faulty equipment (further than 100 feet away goals that are not empty net)
+                game_data= game_data.drop(game_data[(game_data.shot_distance > 100.) & (game_data.is_goal == True) &(game_data.is_empty_net != True) ].index)
                 
                 self.last_event_processed = len(game['liveData']['plays']['allPlays'])-1
                 
