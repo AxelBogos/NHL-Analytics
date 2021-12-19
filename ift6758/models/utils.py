@@ -113,19 +113,11 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
         return X_train, y_train, X_test, y_test
     
 def load_live_data(features: List[str], data, target: str = 'is_goal', use_standard_scaler: bool = True,return_as_numpy: bool = False,
-                   drop_all_na: bool = True, do_split_val: bool = True,
                    convert_bool_to_int=True, one_hot_encode_categoricals = True, scaler = None):
         
         assert features, 'Must provide training features'
         
         df = data.copy()
-        
-        #Removing goals that are known outliers (further than 100 feet away goals that are not empty net)
-        df= df.drop(df[(df.shot_distance > 100.) & (df.is_goal == True) &(df.is_empty_net != True) ].index)
-        
-        if drop_all_na:
-            df = df.dropna(subset=features)
-
         
         df = df.drop(df.columns.difference(features), axis=1)
         
@@ -140,7 +132,6 @@ def load_live_data(features: List[str], data, target: str = 'is_goal', use_stand
             CAT_COLS = df.select_dtypes(exclude=["number", "bool_"]).columns
             df = pd.get_dummies(data=df, columns=CAT_COLS)
 
-
         if convert_bool_to_int:
             BOOL_COLS = df.select_dtypes([bool]).columns
             df[BOOL_COLS] = df[BOOL_COLS].astype(int)
@@ -150,6 +141,3 @@ def load_live_data(features: List[str], data, target: str = 'is_goal', use_stand
             df = df.to_numpy()
         
         return df
-        
-        
-        
