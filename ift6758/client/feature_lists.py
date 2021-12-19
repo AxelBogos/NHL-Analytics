@@ -101,4 +101,10 @@ feature_list_stack_trained = ['period', 'x_coordinate', 'y_coordinate', 'strengt
         'prev_event_type_Missed Shot', 'prev_event_type_Penalty',
         'prev_event_type_Shot', 'prev_event_type_Takeaway']
 
+feature_list = ['period', 'x_coordinate', 'y_coordinate',
+           'game_time(s)', 'prev_event_x', 'prev_event_y',
+           'time_since_prev_event', 'is_rebound', 'distance_to_prev_event',
+           'speed_since_prev_event', 'shot_distance', 'shot_angle',
+           'change_in_angle', 'shot_type', 'prev_event_type','time_since_pp',
+           'home_strength','away_strength', 'strength', 'relative_strength','is_penalty_shot', 'shot_type', 'is_playoff']
 
