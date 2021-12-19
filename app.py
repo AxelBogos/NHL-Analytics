@@ -42,7 +42,7 @@ def before_first_request():
     request = {
         'workspace': "axelbogos",
         'registry_name': '6-lgbm',
-        'version': '1.0.0',
+        'version': '1.0.1',
     }
 
     if not os.path.isfile(os.path.join(LOADED_MODELS_DIR, DEFAULT_MODEL_NAME)):
@@ -53,7 +53,12 @@ def before_first_request():
 
 @app.route("/logs", methods=["GET"])
 def logs():
-    """Reads data from the log file and returns them as the response"""
+    """Reads data from the log file and returns them as the response
+
+    Example:
+        r = requests.get("http://0.0.0.0:8080/logs")
+
+    """
     with open('flask.log') as f:
         response = f.read()
     return jsonify(response)  # response must be json serializable!
@@ -66,23 +71,21 @@ def download_registry_model():
     The comet API key should be retrieved from the ${COMET_API_KEY} environment variable.
     Examples of requests:
         LGBM:
-            request = {'workspace': "axelbogos",'registry_name': '6-lgbm','model_name': '6-LGBM.pkl','version': '1.0.0'}
-            r = requests.post("http://0.0.0.0:8080/download_registry_model",json=request)
+            import requests
+            request = {'workspace': "axelbogos",'registry_name': '6-lgbm','model_name': '6-LGBM.pkl','version': '1.0.1'}
+            r = requests.post("http://0.0.0.0:5000/download_registry_model",json=request)
         5-2 XGB:
             request = {'workspace': "axelbogos",'registry_name': '5-2-grid-search-model','model_name': 'tuned_xgb_model.pkl','version': '2.0.0'}
-            r = requests.post("http://0.0.0.0:8080/download_registry_model",json=request)
-        5-3 XGB:
-            request = {'workspace': "axelbogos",'registry_name': '5-3-best-feature','model_name': 'xgb_feature.pkl','version': '1.0.0'}
-            r = requests.post("http://0.0.0.0:8080/download_registry_model",json=request)
+            r = requests.post("http://0.0.0.0:5000/download_registry_model",json=request)
         6-2 NN:
             request = {'workspace': "axelbogos",'registry_name': '6-2-nn-tuned-model','model_name': 'tuned_nn_model.pkl','version': '1.0.0'}
-            r = requests.post("http://0.0.0.0:8080/download_registry_model",json=request)
-        6-3 Adaboost:
-            request = {'workspace': "axelbogos",'registry_name': '6-3-adaboost-tuned-model','model_name': 'tuned_adaboost_model.pkl','version': '1.0.0'}
-            r = requests.post("http://0.0.0.0:8080/download_registry_model",json=request)
+            r = requests.post("http://0.0.0.0:5000/download_registry_model",json=request)
         6-4 Stacked Classifier:
             request = {'workspace': "axelbogos",'registry_name': '6-4-stacked-trained-tuned-model','model_name': 'tuned_stacked_trained_model.pkl','version': '1.0.0'}
-            r = requests.post("http://0.0.0.0:8080/download_registry_model",json=request)
+            r = requests.post("http://0.0.0.0:5000/download_registry_model",json=request)
+        3-3 Log Regression (Distance + Angle):
+            request = {'workspace': "axelbogos",'registry_name': '3-3-angle-dist-logreg-model','model_name': 'LogReg_dist_angle_model.pkl','version': '1.0.0'}
+            r = requests.post("http://0.0.0.0:5000/download_registry_model",json=request)
     """
 
     global CLASSIFIER  # make this variable global to the scope of the app
@@ -146,7 +149,7 @@ def predict():
     )
     X = X.drop(columns=X.columns.difference(X_test.columns))
     X_test = X_test.drop(columns=X_test.columns.difference(X.columns))
-    r = requests.post("http://0.0.0.0:8080/predict", json=X_test.to_json())
+    r = requests.post("http://0.0.0.0:5000/predict", json=X_test.to_json())
     *--------------END EXAMPLE------------------------*
 
     Returns predictions
@@ -163,4 +166,4 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run(port=8080)
+    app.run(port=5000)

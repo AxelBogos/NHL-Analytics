@@ -1,8 +1,19 @@
+import os
+
+
+
 import json
 import requests
 import pandas as pd
 import logging
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+print(os.curdir)
+from ift6758.client.feature_lists import *
+from ift6758.models.utils import load_live_data
+from sklearn.preprocessing import StandardScaler
+import pickle
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -15,8 +26,15 @@ class ServingClient:
         if features is None:
             features = ["distance"]
         self.features = features
+        self.scaler = pickle.load(open('scaler.pkl','rb'))
 
-        # any other potential initialization
+        self.model_registries_to_file_name = {
+            '6-lgbm': ('6-LGBM.pkl', feature_list_lgbm),
+            '5-2-grid-search-model': ('tuned_xgb_model.pkl', feature_list_xgb),
+            '6-2-nn-tuned-model': ('tuned_nn_model.pkl', feature_list_nn),
+            '6-4-stacked-trained-tuned-model': ('tuned_stacked_trained_model.pkl',feature_list_stack_trained),
+            '3-3-angle-dist-logreg-model':('LogReg_dist_angle_model.pkl',feature_list_logreg)
+        }
 
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
         """
@@ -27,13 +45,24 @@ class ServingClient:
         Args:
             X (Dataframe): Input dataframe to submit to the prediction service.
         """
-
-        raise NotImplementedError("TODO: implement this function")
+        
+        X = load_live_data(features = feature_list,data = X, scaler =self.scaler)
+        
+        for column in self.features:
+            if column not in X.columns:
+                X[column] = np.zeros(X.shape[0])
+        
+        X = X[self.features] #need to make sure columns are in the same order as training time
+        X = X.reset_index()
+        r = requests.post(f"{self.base_url}/predict", json=X.to_json())
+        result = pd.read_json(r.json())
+        return result
 
     def logs(self) -> dict:
         """Get server logs"""
 
-        raise NotImplementedError("TODO: implement this function")
+        r = requests.get(f"{self.base_url}/logs")
+        return r.json()
 
     def download_registry_model(self, workspace: str, model: str, version: str) -> dict:
         """
@@ -51,4 +80,12 @@ class ServingClient:
             version (str): The model version to download
         """
 
-        raise NotImplementedError("TODO: implement this function")
+        assert model in self.model_registries_to_file_name.keys(), f'model name must be in ' \
+                                                                    f'{self.model_registries_to_file_name.keys()} '
+        model_file_name = self.model_registries_to_file_name[model][0]
+        self.features = self.model_registries_to_file_name[model][1]
+        request = {'workspace': workspace, 'registry_name': model, 'model_name': model_file_name, 'version': version}
+        r = requests.post(f"{self.base_url}/download_registry_model", json=request)
+        return r.json()
+
+
