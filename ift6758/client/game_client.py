@@ -89,6 +89,12 @@ class Game_Client:
                 #correctly fill empty_net column, empty = False
                 game_data['is_empty_net'] = game_data['is_empty_net'].fillna(False)
                 
+                #Removing data that can't be used for predictions due to missing values
+                game_data = game_data.dropna()
+                
+                #filtering out shots that have a high probability of being due to faulty equipment (further than 100 feet away goals that are not empty net)
+                game_data= game_data.drop(game_data[(game_data.shot_distance > 100.) & (game_data.is_goal == True) &(game_data.is_empty_net != True) ].index)
+                
                 self.last_event_processed = len(game['liveData']['plays']['allPlays'])-1
                 
                 return game_data
