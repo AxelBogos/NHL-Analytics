@@ -18,7 +18,7 @@ DEFAULT_TEST_SEASONS = ['20192020']
 def load_data(features: List[str], train_val_seasons: List[str] = None, test_season: List[str] = None,
               train_val_ratio: float = 0.2, target: str = 'is_goal', use_standard_scaler: bool = True,
               return_as_numpy: bool = False, drop_all_na: bool = True, do_split_val: bool = True,
-              convert_bool_to_int=True, one_hot_encode_categoricals = True) -> tuple:
+              convert_bool_to_int=True, one_hot_encode_categoricals = True, scaler = None) -> tuple:
     """
     Loads the dataset, drops all but the desired features and target var and returns the train_val_test split.
     :param features: List of features to be used as strings. Ex: ['shot_distance']
@@ -80,8 +80,11 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
     # Scale numeric columns
     if use_standard_scaler:
         NUMERIC_COLS = X_train.select_dtypes([np.number]).columns
-        scaler = StandardScaler()
-        X_train[NUMERIC_COLS] = scaler.fit_transform(X_train[NUMERIC_COLS])
+        if scaler == None: #no scaler = train a new one 
+            scaler = StandardScaler()
+            X_train[NUMERIC_COLS] = scaler.fit_transform(X_train[NUMERIC_COLS])
+        else: # known scaler, don't fit
+             X_train[NUMERIC_COLS] = scaler.transform(X_train[NUMERIC_COLS])
         if do_split_val:
             X_val[NUMERIC_COLS] = scaler.transform(X_val[NUMERIC_COLS])
         X_test[NUMERIC_COLS] = scaler.transform(X_test[NUMERIC_COLS])
@@ -108,3 +111,45 @@ def load_data(features: List[str], train_val_seasons: List[str] = None, test_sea
         return X_train, y_train, X_val, y_val, X_test, y_test
     else:
         return X_train, y_train, X_test, y_test
+    
+def load_live_data(features: List[str], data, target: str = 'is_goal', use_standard_scaler: bool = True,return_as_numpy: bool = False,
+                   drop_all_na: bool = True, do_split_val: bool = True,
+                   convert_bool_to_int=True, one_hot_encode_categoricals = True, scaler = None):
+        
+        assert features, 'Must provide training features'
+        
+        df = data.copy()
+        
+        #Removing goals that are known outliers (further than 100 feet away goals that are not empty net)
+        df= df.drop(df[(df.shot_distance > 100.) & (df.is_goal == True) &(df.is_empty_net != True) ].index)
+        
+        if drop_all_na:
+            df = df.dropna(subset=features)
+            df = df.reset_index()
+        
+        df = df.drop(df.columns.difference(features), axis=1)
+        
+        if use_standard_scaler:
+            NUMERIC_COLS = df.select_dtypes([np.number]).columns
+        if scaler == None: #no scaler = train a new one 
+            scaler = StandardScaler()
+            df[NUMERIC_COLS] = scaler.fit_transform(df[NUMERIC_COLS])
+        else: # known scaler, don't fit
+             df[NUMERIC_COLS] = scaler.transform(df[NUMERIC_COLS])
+        if one_hot_encode_categoricals:
+            CAT_COLS = df.select_dtypes(exclude=["number", "bool_"]).columns
+            df = pd.get_dummies(data=df, columns=CAT_COLS)
+
+
+        if convert_bool_to_int:
+            BOOL_COLS = df.select_dtypes([bool]).columns
+            df[BOOL_COLS] = df[BOOL_COLS].astype(int)
+
+    
+        if return_as_numpy:
+            df = df.to_numpy()
+        
+        return df
+        
+        
+        
