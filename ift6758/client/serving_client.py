@@ -10,9 +10,10 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 print(os.curdir)
 from ift6758.client.feature_lists import *
-# from ift6758.models.utils import load_live_data
+from ift6758.models.utils import load_live_data
 from sklearn.preprocessing import StandardScaler
 import pickle
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
