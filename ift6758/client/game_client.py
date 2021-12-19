@@ -37,7 +37,7 @@ class Game_Client:
 
         if first_request:
             # Write to file
-            with open(self.file_path, 'w') as f:
+            with open(self.file_path, 'r+') as f:
                 f.write(response.text)
                 game = json.load(f) 
                 DFB = DataFrameBuilder()
@@ -101,7 +101,7 @@ class Game_Client:
                 
                 
         else:
-            with open(self.file_path, 'w') as f:
+            with open(self.file_path, 'r+') as f:
                 game = json.load(f)
                 DFB = DataFrameBuilder()
                 game_data = DFB.parse_game_data(game, start_event=self.last_event_processed)
