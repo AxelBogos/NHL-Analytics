@@ -37,7 +37,7 @@ class ServingClient:
         
         for column in self.features:
             if column not in X.columns:
-                x[column] = np.zeros(x.shape[0])
+                X[column] = np.zeros(x.shape[0])
         
         X = X[self.features] #need to make sure columns are in the same order as training time
         X = X.reset_index()
@@ -72,16 +72,3 @@ class ServingClient:
         request = {'workspace': workspace, 'registry_name': model, 'model_name': model_file_name, 'version': version}
         r = requests.post(f"{self.base_url}/download_registry_model", json=request)
         return r.json()
-
-© 2021 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Docs
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
