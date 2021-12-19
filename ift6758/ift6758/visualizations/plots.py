@@ -6,7 +6,7 @@ import pandas as pd
 import seaborn as sns
 
 TIDY_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'tidy_data.csv')
-SAVE_FIG_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'figures')
+SAVE_FIG_PATH = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'figures')
 
 
 class HockeyPlotter:
