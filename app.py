@@ -11,13 +11,9 @@ gunicorn can be installed via:
 from comet_ml import API
 from dotenv import load_dotenv
 import os
-from pathlib import Path
 import logging
 from flask import Flask, jsonify, request, abort
-import sklearn
 import pandas as pd
-import joblib
-import ift6758
 import pickle
 
 load_dotenv()
