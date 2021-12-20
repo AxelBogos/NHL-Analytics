@@ -32,9 +32,15 @@ def before_first_request():
     }
 
     if not os.path.isfile(os.path.join(LOADED_MODELS_DIR, DEFAULT_MODEL_NAME)):
+        app.logger.info(f'No local files {DEFAULT_MODEL_NAME} found. Downloading it from Comet.')
         API(api_key=os.getenv('COMET_API_KEY')).download_registry_model(**request, output_path=LOADED_MODELS_DIR)
-    CLASSIFIER = pickle.load(open(os.path.join(LOADED_MODELS_DIR, DEFAULT_MODEL_NAME), 'rb'))
-    app.logger.info('Default Model Loaded!')
+
+    if os.path.isfile(os.path.join(LOADED_MODELS_DIR, DEFAULT_MODEL_NAME)):
+        app.logger.info('Download succesfull.')
+        CLASSIFIER = pickle.load(open(os.path.join(LOADED_MODELS_DIR, DEFAULT_MODEL_NAME), 'rb'))
+        app.logger.info('Default Model Loaded!')
+    else:
+        app.logger.info('Download failed. Check API key.')
 
 
 @app.route("/logs", methods=["GET"])
@@ -45,10 +51,15 @@ def logs():
         r = requests.get("http://0.0.0.0:5000/logs")
 
     """
-    with open('flask.log') as f:
-        response = f.read().splitlines()
+    FILE_PATH = 'flask.log'
+    if not os.path.isfile(os.path.join(LOADED_MODELS_DIR, DEFAULT_MODEL_NAME)):
+        response = f"{FILE_PATH} is an invalid log file path."
+        app.logger.info(response)
+    else:
+        with open('flask.log') as f:
+            response = f.read().splitlines()
 
-    return jsonify(response)  # response must be json serializable!just a
+    return jsonify(response)
 
 
 @app.route("/download_registry_model", methods=["POST"])
@@ -88,6 +99,7 @@ def download_registry_model():
         CLASSIFIER = pickle.load(open(os.path.join(LOADED_MODELS_DIR, model_name), 'rb'))
         response = 'Success'
     else:
+        app.logger.info(f'{model_name} is not found locally. Downloading from Comet.')
         # Make API request
         req = {
             'workspace': json['workspace'],
@@ -97,16 +109,15 @@ def download_registry_model():
         # Request the API
         API(api_key=os.getenv('COMET_API_KEY')).download_registry_model(**req, output_path=LOADED_MODELS_DIR)
 
-        # check if success
-        if os.path.isfile(os.path.join(LOADED_MODELS_DIR, DEFAULT_MODEL_NAME)):
-            CLASSIFIER = pickle.load(open(os.path.join(LOADED_MODELS_DIR, model_name), 'rb'))
-            app.logger.info(f'Download successful. Loaded {model_name}.')
-            response = 'Success'
-        else:
-            app.logger.info(f'Download failed. Current model loaded is {str(CLASSIFIER)}.')
-            response = 'Fail'
+    # check if success
+    if os.path.isfile(os.path.join(LOADED_MODELS_DIR, DEFAULT_MODEL_NAME)):
+        CLASSIFIER = pickle.load(open(os.path.join(LOADED_MODELS_DIR, model_name), 'rb'))
+        response = f'Download successful. Loaded {model_name}.'
+        app.logger.info(response)
+    else:
+        response = f'Download failed. Current model loaded is {str(CLASSIFIER)}.'
+        app.logger.info(response)
 
-    app.logger.info(response)
     return jsonify(response)  # response must be json serializable!
 
 
@@ -143,12 +154,15 @@ def predict():
     """
     global CLASSIFIER
     # Get POST json data
-    df_json = request.get_json()
-    app.logger.info(df_json)
-    df = pd.read_json(df_json)
+    try:
+        df_json = request.get_json()
+        df = pd.read_json(df_json)
+        response = CLASSIFIER.predict_proba(df)
+        app.logger.info('Success. Returning probabilities.')
+    except Exception as e:
+        app.logger.info(f"An error has occured: {e}")
+        response = e
 
-    response = CLASSIFIER.predict_proba(df)
-    app.logger.info('Success. Returning probabilities.')
     return jsonify(response)  # response must be json serializable!
 
 
