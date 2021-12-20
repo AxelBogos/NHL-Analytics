@@ -1,0 +1,1 @@
+docker run --env-file .env --publish 5000:5000  ift6758
