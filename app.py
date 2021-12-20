@@ -1,13 +1,3 @@
-"""
-If you are in the same directory as this file (app.py), you can run run the app using gunicorn:
-    
-    $ gunicorn --bind 0.0.0.0:<PORT> app:app
-
-gunicorn can be installed via:
-
-    $ pip install gunicorn
-
-"""
 from comet_ml import API
 from dotenv import load_dotenv
 import os
@@ -52,12 +42,13 @@ def logs():
     """Reads data from the log file and returns them as the response
 
     Example:
-        r = requests.get("http://0.0.0.0:8080/logs")
+        r = requests.get("http://0.0.0.0:5000/logs")
 
     """
     with open('flask.log') as f:
-        response = f.read()
-    return jsonify(response)  # response must be json serializable!
+        response = f.read().splitlines()
+
+    return jsonify(response)  # response must be json serializable!just a
 
 
 @app.route("/download_registry_model", methods=["POST"])
@@ -157,7 +148,7 @@ def predict():
     df = pd.read_json(df_json)
 
     response = CLASSIFIER.predict_proba(df)
-    app.logger.info(response)
+    app.logger.info('Success. Returning probabilities.')
     return jsonify(response)  # response must be json serializable!
 
 
