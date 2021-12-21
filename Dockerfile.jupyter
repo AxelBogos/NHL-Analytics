@@ -13,6 +13,8 @@ COPY ./ift6758/ift6758/__init__.py ./ift6758/ift6758/__init__.py
 COPY ./app.py .
 COPY ./live_game_widget.ipynb .
 COPY ./scaler.pkl .
+RUN mkdir ./ift6758/ift6758/data
+RUN mkdir ./ift6758/ift6758/data/live_raw
 
 
 # install libs
