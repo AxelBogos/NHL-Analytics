@@ -53,7 +53,7 @@ class Game_Client:
 
         if not data_exist:
             # Write to file
-            with open(file_path, 'r+') as f:
+            with open(self.file_path, 'w') as f:
                 f.write(response.text)
 
             with open(self.file_path, 'r+') as f:
