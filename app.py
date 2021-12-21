@@ -157,13 +157,14 @@ def predict():
     try:
         df_json = request.get_json()
         df = pd.read_json(df_json)
-        response = CLASSIFIER.predict_proba(df)
+        response = CLASSIFIER.predict_proba(df)[:,1]
         app.logger.info('Success. Returning probabilities.')
+        return pd.DataFrame(response).to_json() # response must be json serializable!
+
     except Exception as e:
         app.logger.info(f"An error has occured: {e}")
         response = e
-
-    return jsonify(response)  # response must be json serializable!
+        return jsonify(response)  # response must be json serializable!
 
 
 if __name__ == '__main__':
