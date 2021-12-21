@@ -8,7 +8,7 @@ COPY /ift6758/requirements.txt .
 COPY ./ift6758/ift6758/client ./ift6758/ift6758/client
 COPY ./ift6758/ift6758/features ./ift6758/ift6758/features
 COPY ./app.py .
-# TODO Add ipynb file
+COPY ./live_game_widget.ipynb .
 
 
 # install libs
