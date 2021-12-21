@@ -5,8 +5,8 @@ WORKDIR /code
 COPY /ift6758/requirements.txt .
 
 # add files
-COPY ./ift6758/ift6758/client ./client
-COPY ./ift6758/ift6758/features ./features
+COPY ./ift6758/ift6758/client ./ift6758/ift6758/client
+COPY ./ift6758/ift6758/features ./ift6758/ift6758/features
 COPY ./app.py .
 # TODO Add ipynb file
 
@@ -14,6 +14,7 @@ COPY ./app.py .
 # install libs
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+
 
 # Environment variables
 ENV COMET_API_KEY=$COMET_API_KEY
