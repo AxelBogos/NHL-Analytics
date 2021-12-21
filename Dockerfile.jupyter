@@ -7,8 +7,12 @@ COPY /ift6758/requirements.txt .
 # add files
 COPY ./ift6758/ift6758/client ./ift6758/ift6758/client
 COPY ./ift6758/ift6758/features ./ift6758/ift6758/features
+COPY ./ift6758/ift6758/models/utils.py ./ift6758/ift6758/models/utils.py
+COPY ./ift6758/ift6758/models/__init__.py ./ift6758/ift6758/models/__init__.py
+COPY ./ift6758/ift6758/__init__.py ./ift6758/ift6758/__init__.py
 COPY ./app.py .
 COPY ./live_game_widget.ipynb .
+COPY ./scaler.pkl .
 
 
 # install libs

@@ -4,13 +4,13 @@ import os
 import pandas as pd
 from tqdm import tqdm
 import numpy as np
-from ift6758.features.feature_engineering import add_shot_distance_feature, add_offensive_side_feature, add_shot_angle,\
+os.chdir('../')
+from ift6758.ift6758.features.feature_engineering import add_shot_distance_feature, add_offensive_side_feature, add_shot_angle,\
     add_change_in_shot_angle
 from datetime import datetime
 
 RAW_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'raw')
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
-
 
 class DataFrameBuilder:
     """

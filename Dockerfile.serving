@@ -10,6 +10,9 @@ COPY /ift6758/requirements.txt .
 COPY ./loaded_models/6-LGBM.pkl .
 COPY ./ift6758/ift6758/client ./ift6758/ift6758/client
 COPY ./ift6758/ift6758/features ./ift6758/ift6758/features
+COPY ./ift6758/ift6758/models/utils.py ./ift6758/ift6758/models/utils.py
+COPY ./ift6758/ift6758/models/__init__.py ./ift6758/ift6758/models/__init__.py
+COPY ./ift6758/ift6758/__init__.py ./ift6758/ift6758/__init__.py
 COPY ./app.py .
 
 # install libs
@@ -22,8 +25,6 @@ ENV COMET_API_KEY=$COMET_API_KEY
 RUN pip install python-dotenv
 
 RUN pip install gunicorn
-
-# CMD python app.py
 
 CMD gunicorn --bind 0.0.0.0:5000 app:app
 
