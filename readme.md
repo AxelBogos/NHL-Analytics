@@ -22,6 +22,10 @@
 -> See interactive plot in `figures/Q6_plot.html` <br>
 -> Blog post repo [here!](https://github.com/MAGjagger/ift6758-Blog)
 
+-> Here's a screenshot of a docker-hosted jupyter notebook which serves as the dashboard in milestone 3.
+
+![Screen Shot 2021-12-21 at 5 33 04 PM](https://user-images.githubusercontent.com/35436065/147006773-630f3cf4-3e45-45ec-864f-7a62649069c5.png)
+
 ## 📐 Environment Variables
 - `COMET_API_KEY` : Your personal API key to use *comet.ml*. Create a free acount and see `Account -> Settings -> Developer Information`
 
@@ -66,15 +70,11 @@ python ift6758/visualizations/plots.py
 7. Have fun exploring any notebook and figures in 
 `./notebooks` and `./figures`
 
-## ✒️ Documentation
-
-[Documentation](https://linktodocumentation) or just write more details here
-
 ## ☑️ Milestones
 
 - [x] Milestone 1 - October 15 2021, 11:59PM
-- [ ] Milestone 2 - November 26 2021, 11:59PM
-- [ ] Milestone 3 - TBA
+- [x] Milestone 2 - November 26 2021, 11:59PM
+- [x] Milestone 3 - December 23rd
 
 ## 📡 Deployment
 
@@ -97,5 +97,3 @@ python ift6758/visualizations/plots.py
 ```
 
 ## 🔨 Appendix
-
-TBA
