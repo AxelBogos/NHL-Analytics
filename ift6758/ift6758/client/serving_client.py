@@ -57,7 +57,7 @@ class ServingClient:
         
         X = X[self.features] #need to make sure columns are in the same order as training time
         r = requests.post(f"{self.base_url}/predict", json=X.to_json())
-        print(r.json())
+
         result = pd.DataFrame.from_dict(r.json())
         return result
 
