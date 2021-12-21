@@ -3,7 +3,7 @@ import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 os.chdir('../')
 os.chdir('../')
-
+os.chdir('../')
 import json
 import requests
 import pandas as pd
@@ -11,8 +11,8 @@ import logging
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-from ift6758.client.feature_lists import *
-from ift6758.models.utils import load_live_data
+from ift6758.ift6758.client.feature_lists import *
+from ift6758.ift6758.models.utils import load_live_data
 from sklearn.preprocessing import StandardScaler
 import pickle
 import numpy as np

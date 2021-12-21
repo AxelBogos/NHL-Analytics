@@ -7,10 +7,10 @@ import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 os.chdir('../')
 os.chdir('../')
+os.chdir('../')
 
-
-from ift6758.features.tidy_dataframe_builder import  DataFrameBuilder
-from ift6758.features.feature_engineering  import add_shot_distance_feature, add_offensive_side_feature, add_shot_angle,\
+from ift6758.ift6758.features.tidy_dataframe_builder import  DataFrameBuilder
+from ift6758.ift6758.features.feature_engineering  import add_shot_distance_feature, add_offensive_side_feature, add_shot_angle,\
     add_change_in_shot_angle
 
 import pandas as pd
