@@ -20,7 +20,11 @@
 
 ## 👀️ Demo
 -> See interactive plot in `figures/Q6_plot.html` <br>
+Here's a screenshot of the interactive plot: 
+<img width="1349" alt="Screen Shot 2022-01-26 at 7 01 33 PM" src="https://user-images.githubusercontent.com/35436065/151267125-a7ee42dc-be23-4cfd-ba59-a91cdad2937f.png">
+
 -> Blog post repo [here!](https://github.com/MAGjagger/ift6758-Blog)
+
 
 -> Here's a screenshot of a docker-hosted jupyter notebook which serves as the dashboard in milestone 3.
 
